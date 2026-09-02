@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { stripe } from '@/lib/stripe';
+import { getOrigin } from '@/lib/origin';
 
 export async function GET(request: NextRequest) {
   const sessionId = request.nextUrl.searchParams.get('session_id');
@@ -33,6 +34,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/portal?payment=success', request.url));
   } catch (err) {
     console.error('Payment success error:', err);
-    return NextResponse.redirect(new URL('/?payment_error=1', request.url));
+    return NextResponse.redirect(new URL('/?payment_error=1', getOrigin(request)));
   }
 }

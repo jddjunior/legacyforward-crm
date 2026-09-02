@@ -26,7 +26,7 @@ export default async function PortalLayout({ children }: { children: React.React
           <div className="bg-accent/10 border-b border-accent/30 px-6 py-2.5 text-sm flex items-center gap-3">
             <span className="font-medium text-ink">Onboarding in progress</span>
             <span className="text-ink-muted">— Step {stageIndex + 1} of {ONBOARDING_ORDER.length}: {org.onboardingStage.replace(/_/g, ' ')}</span>
-            <span className="ml-auto text-xs font-mono text-ink-subtle">{Math.round((stageIndex / (ONBOARDING_ORDER.length - 1)) * 100)}%</span>
+            <a href="/portal/onboarding" className="ml-auto text-xs font-semibold text-brand">Continue setup →</a>
           </div>
         )}
         {children}

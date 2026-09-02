@@ -13,7 +13,10 @@ export default async function AgencyProposalsPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-display mb-6">Proposals</h1>
+      <div className="flex items-end justify-between mb-6">
+        <h1 className="text-display">Proposals</h1>
+        <Link href="/agency/proposals/new" className="btn btn-primary">+ New Proposal</Link>
+      </div>
       {proposals.length === 0 ? (
         <div className="card p-12 text-center text-ink-muted">
           No proposals yet. Proposals are created when you pitch a website build to a client.

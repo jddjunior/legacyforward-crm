@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { workos } from '@/lib/workos';
 import { prisma } from '@/lib/db';
 import { signSession } from '@/lib/session';
+import { getOrigin } from '@/lib/origin';
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code');
@@ -60,6 +61,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (err) {
     console.error('Auth callback error:', err);
-    return NextResponse.redirect(new URL('/?auth_error=1', request.url));
+    return NextResponse.redirect(new URL('/?auth_error=1', getOrigin(request)));
   }
 }

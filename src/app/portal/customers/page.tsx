@@ -65,7 +65,9 @@ export default async function CustomersPage() {
             <tbody className="divide-y divide-ink-line">
               {customers.map((c) => (
                 <tr key={c.id} className="hover:bg-ink-surface">
-                  <td className="px-5 py-3 font-medium">{c.name}</td>
+                  <td className="px-5 py-3 font-medium">
+                    <a href={`/portal/customers/${c.id}`} className="hover:text-brand">{c.name}</a>
+                  </td>
                   <td className="px-5 py-3 text-ink-muted">{c.email || '—'}</td>
                   <td className="px-5 py-3 text-ink-muted">{c.phone || '—'}</td>
                   <td className="px-5 py-3">{c.value ? `$${(c.value / 100).toLocaleString()}` : '—'}</td>

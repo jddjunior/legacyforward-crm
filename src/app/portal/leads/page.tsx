@@ -76,7 +76,9 @@ export default async function LeadsPage() {
             <tbody className="divide-y divide-ink-line">
               {leads.map((lead) => (
                 <tr key={lead.id} className="hover:bg-ink-surface">
-                  <td className="px-5 py-3 font-medium">{lead.name}</td>
+                  <td className="px-5 py-3 font-medium">
+                    <a href={`/portal/leads/${lead.id}`} className="hover:text-brand">{lead.name}</a>
+                  </td>
                   <td className="px-5 py-3 text-ink-muted">{lead.email || '—'}</td>
                   <td className="px-5 py-3 text-ink-muted">{lead.phone || '—'}</td>
                   <td className="px-5 py-3 text-ink-muted capitalize">{lead.source || '—'}</td>

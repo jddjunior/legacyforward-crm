@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const proposal = await prisma.proposal.findUnique({ where: { id: proposalId } });
     if (!proposal) return NextResponse.json({ error: 'Proposal not found' }, { status: 404 });
 
-    const origin = request.nextUrl.origin;
+    const origin = getOrigin(request);
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -43,5 +43,8 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error('Checkout error:', err);
     return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });
+  }
+}
+ checkout session' }, { status: 500 });
   }
 }
