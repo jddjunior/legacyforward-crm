@@ -34,11 +34,16 @@ export async function linkConnections(formData: FormData) {
 
   const providers = formData.getAll('providers');
   for (const provider of providers) {
-    await prisma.connection.upsert({
-      where: { orgId_provider: { orgId: session.orgId, provider: String(provider) } },
-      update: { status: 'connected' },
-      create: { orgId: session.orgId, provider: String(provider), status: 'connected' },
+    const existing = await prisma.connection.findFirst({
+      where: { orgId: session.orgId, provider: String(provider) },
     });
+    if (existing) {
+      await prisma.connection.update({ where: { id: existing.id }, data: { status: 'connected' } });
+    } else {
+      await prisma.connection.create({
+        data: { orgId: session.orgId, provider: String(provider), status: 'connected' },
+      });
+    }
   }
 
   await prisma.org.update({

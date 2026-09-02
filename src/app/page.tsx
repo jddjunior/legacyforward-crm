@@ -17,14 +17,9 @@ export default function LandingPage() {
           Multi-tenant CRM, lead tracking, approvals, and a pitch-to-pay gateway — all in one place.
         </p>
 
-        <div className="flex gap-3">
-          <Link href="/api/auth/login" className="btn btn-primary flex-1 justify-center">
-            Sign in with WorkOS
-          </Link>
-          <Link href="/pitch/demo" className="btn flex-1 justify-center">
-            View demo pitch
-          </Link>
-        </div>
+        <Link href="/api/auth/login" className="btn btn-primary w-full justify-center">
+          Sign in with WorkOS
+        </Link>
 
         <div className="mt-8 pt-8 border-t border-[#e9e6de]">
           <div className="grid grid-cols-3 gap-4">

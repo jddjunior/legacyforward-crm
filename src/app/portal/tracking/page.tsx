@@ -49,7 +49,7 @@ export default async function TrackingPage() {
                 <tr key={lead.id} className="hover:bg-[#f7f6f2] transition-colors">
                   <td className="px-5 py-3 font-medium text-[#14141a]">
                     <a href={`/portal/leads/${lead.id}`} className="hover:text-[#146c43]">{lead.name}</a>
-                    {lead.company && <span className="text-[#5f5f66] font-normal"> · {lead.company}</span>}
+                    {(lead.email || lead.phone) && <span className="text-[#5f5f66] font-normal"> · {lead.email || lead.phone}</span>}
                   </td>
                   <td className="px-5 py-3 capitalize text-[#5f5f66]">{lead.source || 'organic'}</td>
                   <td className="px-5 py-3">

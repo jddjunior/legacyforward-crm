@@ -36,7 +36,7 @@ export default async function ProfilePage() {
             </div>
             <div>
               <div className="label mb-2">Role</div>
-              <div className="text-[14px] font-medium">{session.role || 'owner'}</div>
+              <div className="text-[14px] font-medium">{session.orgRole || 'owner'}</div>
             </div>
             <div>
               <div className="label mb-2">Member since</div>
