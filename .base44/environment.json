@@ -1,0 +1,10 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/api/health",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    { "name": "WORKOS_API_KEY", "description": "WorkOS API key from your WorkOS dashboard → API Keys page", "requiredAtBoot": false },
+    { "name": "WORKOS_CLIENT_ID", "description": "WorkOS Client ID from your WorkOS dashboard → API Keys page", "requiredAtBoot": false },
+    { "name": "STRIPE_SECRET_KEY", "description": "Stripe secret key (sk_test_...) from your Stripe dashboard → Developers → API keys", "requiredAtBoot": false }
+  ]
+}
