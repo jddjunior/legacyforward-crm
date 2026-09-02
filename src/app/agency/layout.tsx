@@ -1,23 +1,14 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { LayoutDashboard, Building2, FileText, CheckSquare } from 'lucide-react';
 import { prisma } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { signSession } from '@/lib/session';
-
-const navItems = [
-  { id: '/agency', label: 'Dashboard', icon: LayoutDashboard },
-  { id: '/agency/clients', label: 'Clients', icon: Building2 },
-  { id: '/agency/proposals', label: 'Proposals', icon: FileText },
-  { id: '/agency/approvals', label: 'Approvals Queue', icon: CheckSquare },
-];
+import AgencySidebar from '@/components/AgencySidebar';
 
 export default async function AgencyLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   if (!session) redirect('/api/auth/login');
 
-  // Find agency org for this user
   const membership = await prisma.membership.findFirst({
     where: { userId: session.userId, role: 'agency_admin' },
     include: { org: true },
@@ -25,7 +16,6 @@ export default async function AgencyLayout({ children }: { children: React.React
 
   if (!membership) redirect('/portal');
 
-  // Update session orgId if needed
   if (session.orgId !== membership.orgId) {
     const newToken = await signSession({
       ...session,
@@ -41,10 +31,16 @@ export default async function AgencyLayout({ children }: { children: React.React
     });
   }
 
+  const userName = session.name || session.email.split('@')[0];
+
   return (
-    <div className="flex min-h-screen bg-ink-surface">
-      <AgencySidebar />
-      <main className="flex-1 min-w-0">{children}</main>
+    <div className="min-h-screen bg-[#e6e3dc] p-[14px]">
+      <div className="flex items-stretch min-h-[calc(100vh-28px)] bg-[#f6f5f1] rounded-[13px] overflow-hidden border border-[#dcd8cf]">
+        <AgencySidebar userName={userName} pendingCount={0} />
+        <main className="flex-1 min-w-0 flex flex-col">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
