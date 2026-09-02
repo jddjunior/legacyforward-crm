@@ -1,0 +1,249 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Tenancy ──────────────────────────────────────────────
+
+model Org {
+  id              String   @id @default(cuid())
+  workosOrgId     String?  @unique
+  name            String
+  slug            String?  @unique
+  onboardingStage String   @default("proposal_sent")
+  // proposal_sent → proposal_approved → payment_complete → account_created
+  // → brand_uploaded → connections_linked → reviews_approved → active
+  stripeCustomerId String?
+  brandColor      String?
+  logoUrl         String?
+  isAgency        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  memberships  Membership[]
+  proposals    Proposal[]
+  leads        Lead[]
+  customers    Customer[]
+  deals        Deal[]
+  approvals    Approval[]
+  reviews      Review[]
+  services     Service[]
+  connections  Connection[]
+  auditLogs    AuditLog[]
+  payments     Payment[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  workosUserId String?  @unique
+  email        String   @unique
+  name         String?
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships Membership[]
+  auditLogs   AuditLog[]
+}
+
+model Membership {
+  id     String   @id @default(cuid())
+  userId String
+  orgId  String
+  role   String   @default("viewer") // owner, manager, viewer, agency_admin
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org  Org  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, orgId])
+}
+
+model AuditLog {
+  id       String   @id @default(cuid())
+  orgId    String
+  userId   String?
+  action   String
+  entity   String
+  entityId String?
+  metadata Json?
+
+  org  Org   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+// ── Pitch / Gateway ──────────────────────────────────────
+
+model Proposal {
+  id     String  @id @default(cuid())
+  orgId  String
+  title  String
+  pages  Json    // [{ name, sections: [{ heading, body, image }] }]
+  status String  @default("draft") // draft, sent, approved, rejected
+  token  String  @unique @default(cuid())
+
+  org            Org            @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  payments       Payment[]
+  changeRequests ChangeRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ChangeRequest {
+  id         String  @id @default(cuid())
+  proposalId String
+  page       String
+  elementRef String?
+  request    String
+  status     String  @default("pending") // pending, resolved
+
+  proposal  Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Payment {
+  id                   String  @id @default(cuid())
+  orgId                String?
+  proposalId           String?
+  stripeSessionId      String?
+  stripePaymentIntentId String?
+  amount               Int     // cents
+  type                 String  // one_time, subscription
+  status               String  @default("pending") // pending, paid, failed, refunded
+
+  org      Org?      @relation(fields: [orgId], references: [id])
+  proposal Proposal? @relation(fields: [proposalId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+// ── CRM ───────────────────────────────────────────────────
+
+model Lead {
+  id      String   @id @default(cuid())
+  orgId   String
+  name    String
+  email   String?
+  phone   String?
+  source  String?  // call, form, referral, organic
+  status  String   @default("new") // new, contacted, qualified, lost
+  notes   String?
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+model Customer {
+  id      String   @id @default(cuid())
+  orgId   String
+  name    String
+  email   String?
+  phone   String?
+  address String?
+  value   Int?     // cents
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+model Deal {
+  id         String   @id @default(cuid())
+  orgId      String
+  title      String
+  customerId String?
+  value      Int      // cents
+  stage      String   @default("lead") // lead, contacted, qualified, proposal, won, lost
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+// ── Approvals ────────────────────────────────────────────
+
+model Approval {
+  id      String   @id @default(cuid())
+  orgId   String
+  type    String   // ad, social, review, content
+  title   String
+  content Json?
+  status  String   @default("pending") // pending, approved, rejected
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+// ── Reviews ──────────────────────────────────────────────
+
+model Review {
+  id      String  @id @default(cuid())
+  orgId   String
+  source  String // google, facebook, yelp
+  author  String
+  rating  Int
+  content String?
+  status  String @default("pending") // pending, approved, published
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+// ── Services ─────────────────────────────────────────────
+
+model Service {
+  id          String   @id @default(cuid())
+  orgId       String
+  name        String
+  description String?
+  price       Int      // cents
+  cost        Int?     // cents
+  active      Boolean  @default(true)
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+// ── Connections (integrations) ──────────────────────────
+
+model Connection {
+  id        String   @id @default(cuid())
+  orgId     String
+  provider  String   // google_ads, meta, callrail, stripe, etc.
+  status    String   @default("pending") // pending, connected, error
+  metadata  Json?
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+}

@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #e6e3dc;
+    font-family: Geist, system-ui, sans-serif;
+    color: #1a1a22;
+    -webkit-font-smoothing: antialiased;
+    text-wrap: pretty;
+  }
+  a { color: #335aea; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  ::placeholder { color: #9a9aa3; }
+}
+
+@layer components {
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 38px; padding: 0 16px; border-radius: 10px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    border: 1px solid #e8e6e0; background: #fff; color: #1a1a22;
+    transition: all .15s;
+  }
+  .btn:hover { border-color: #335aea; text-decoration: none; }
+  .btn-primary { background: #335aea; border-color: #335aea; color: #fff; }
+  .btn-primary:hover { background: #2942cc; border-color: #2942cc; }
+  .btn-ghost { background: transparent; border-color: transparent; color: #6b6b76; }
+  .btn-ghost:hover { background: #f6f5f1; border-color: transparent; color: #1a1a22; }
+
+  .input {
+    width: 100%; height: 38px; padding: 0 12px;
+    border: 1px solid #e8e6e0; border-radius: 10px;
+    font-size: 14px; background: #fff; outline: none;
+    transition: border .15s;
+  }
+  .input:focus { border-color: #335aea; }
+  textarea.input { height: auto; padding: 10px 12px; resize: vertical; }
+
+  .card { background: #fff; border: 1px solid #e8e6e0; border-radius: 14px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; padding: 3px 10px;
+    border-radius: 999px;
+  }
+  .badge-green { background: #e8f5ee; color: #15803d; }
+  .badge-yellow { background: #fef9c3; color: #854d0e; }
+  .badge-red { background: #fee2e2; color: #b91c1c; }
+  .badge-blue { background: #eef2ff; color: #335aea; }
+  .badge-gray { background: #f3f4f6; color: #6b6b76; }
+
+  .stat { font-size: 28px; font-weight: 600; letter-spacing: -0.03em; }
+  .label { font-size: 12px; font-weight: 500; color: #6b6b76; text-transform: uppercase; letter-spacing: 0.05em; }
+}
