@@ -51,10 +51,12 @@ export async function GET(request: NextRequest) {
     });
 
     const response = NextResponse.redirect(new URL('/portal', getOrigin(request)));
+    // SameSite=None + Secure is required for the session cookie to be sent
+    // when the app runs inside an embedded iframe preview (third-party context).
     response.cookies.set('lf-session', sessionToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       path: '/',
       maxAge: 7 * 24 * 60 * 60,
     });

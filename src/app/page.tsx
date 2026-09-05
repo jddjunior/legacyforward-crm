@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import SignInButton from '@/components/SignInButton';
 
 export default function LandingPage() {
   return (
@@ -17,9 +17,7 @@ export default function LandingPage() {
           Multi-tenant CRM, lead tracking, approvals, and a pitch-to-pay gateway — all in one place.
         </p>
 
-        <Link href="/api/auth/login" className="btn btn-primary w-full justify-center">
-          Sign in with WorkOS
-        </Link>
+        <SignInButton />
 
         <div className="mt-8 pt-8 border-t border-[#e9e6de]">
           <div className="grid grid-cols-3 gap-4">

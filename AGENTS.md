@@ -86,7 +86,17 @@ prisma/
 ```bash
 curl http://localhost:3000/api/health          # → {"status":"ok"}
 curl http://localhost:3000/pitch/demo          # → proposal preview
+# Full WorkOS auth debug loop (signup, sign-in, redirect URI, callback, route protection):
+docker compose -f docker-compose.base44.yml exec web sh scripts/debug-auth.sh
 # With WorkOS + Stripe configured:
 #   Visit / → sign in → portal dashboard with seeded data
 #   Visit /agency → agency console with all clients
 ```
+
+## WorkOS + iframe preview quirks
+
+- **WorkOS blocks its hosted sign-in page inside iframes** (CSP `frame-ancestors` only allows bolt.new/lovable/replit/etc.). Inside the Base44 preview, `SignInButton` opens `/api/auth/login` in a new tab instead. Never make the sign-in link navigate an embedded frame.
+- The session cookie (`lf-session`) is `SameSite=None; Secure` so it is sent while the app runs in a third-party iframe preview.
+- WorkOS's `/user_management/authenticate` needs the key as `client_secret` in the body (that's how the SDK v7 calls it) — a Bearer-only request returns `invalid_client`.
+- If the sign-in lands on `redirect-uri-invalid`, the preview host changed: add `<public-preview-url>/api/auth/callback` under WorkOS dashboard → Authentication → Redirects. The public preview URL derives from `BASE44_PUBLIC_HOST_SUFFIX` (see `src/lib/origin.ts`).
+- `scripts/debug-auth.sh` uses throwaway test user `debug-tester@legacyforward.test` (password in the script).
