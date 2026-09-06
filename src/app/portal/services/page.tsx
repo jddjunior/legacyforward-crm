@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { getSession } from '@/lib/auth';
 import PageHeader from '@/components/PageHeader';
 
@@ -6,7 +6,9 @@ export default async function ServicesPage() {
   const session = await getSession();
   if (!session?.orgId) return null;
 
-  const services = await prisma.service.findMany({
+  const db = forSession(session);
+
+  const services = await db.service.findMany({
     where: { orgId: session.orgId },
     orderBy: { createdAt: 'desc' },
   });

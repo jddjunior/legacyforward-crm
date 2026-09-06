@@ -1,11 +1,12 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { requireSession } from '@/lib/auth';
 
 export async function createProposal(formData: FormData) {
   const session = await requireSession();
+  const db = forSession(session);
   if (!session.orgId) throw new Error('No org');
 
   const title = String(formData.get('title'));
@@ -34,7 +35,7 @@ export async function createProposal(formData: FormData) {
     });
   }
 
-  await prisma.proposal.create({
+  await db.proposal.create({
     data: {
       orgId: clientOrgId,
       title,

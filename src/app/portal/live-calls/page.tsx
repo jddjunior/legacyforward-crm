@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { getSession } from '@/lib/auth';
 import Header from '@/components/portal/Header';
 import RouteShell from '@/components/portal/RouteShell';
@@ -8,7 +8,9 @@ export default async function LiveCallsPage() {
   const session = await getSession();
   if (!session?.orgId) return null;
 
-  const calls = await prisma.callRecord.findMany({
+  const db = forSession(session);
+
+  const calls = await db.callRecord.findMany({
     where: { orgId: session.orgId },
     orderBy: { startedAt: 'desc' },
     take: 30,

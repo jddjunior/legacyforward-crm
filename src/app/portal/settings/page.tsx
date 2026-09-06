@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { getSession } from '@/lib/auth';
 import PageHeader from '@/components/PageHeader';
 
@@ -6,11 +6,13 @@ export default async function SettingsPage() {
   const session = await getSession();
   if (!session?.orgId) return null;
 
-  const org = await prisma.org.findUnique({ where: { id: session.orgId } });
+  const db = forSession(session);
+
+  const org = await db.org.findUnique({ where: { id: session.orgId } });
   if (!org) return null;
 
-  const user = await prisma.user.findUnique({ where: { id: session.userId } });
-  const memberships = await prisma.membership.findMany({
+  const user = await db.user.findUnique({ where: { id: session.userId } });
+  const memberships = await db.membership.findMany({
     where: { orgId: session.orgId },
     include: { user: true },
   });

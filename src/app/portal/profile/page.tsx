@@ -1,12 +1,14 @@
 import { getSession } from '@/lib/auth';
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import PageHeader from '@/components/PageHeader';
 
 export default async function ProfilePage() {
   const session = await getSession();
   if (!session?.orgId) return null;
 
-  const org = await prisma.org.findUnique({ where: { id: session.orgId } });
+  const db = forSession(session);
+
+  const org = await db.org.findUnique({ where: { id: session.orgId } });
   const initials = (session.name || session.email).split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
   return (

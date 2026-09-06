@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { getSession } from '@/lib/auth';
 import { saveBrand, linkConnections, completeOnboarding } from '@/app/actions/onboarding';
 import { Check, Upload, Link2, Star, Rocket } from 'lucide-react';
@@ -15,7 +15,9 @@ export default async function OnboardingPage() {
   const session = await getSession();
   if (!session?.orgId) return null;
 
-  const org = await prisma.org.findUnique({ where: { id: session.orgId } });
+  const db = forSession(session);
+
+  const org = await db.org.findUnique({ where: { id: session.orgId } });
   if (!org) return null;
 
   const currentStepIndex = STEPS.findIndex(s => s.stage === org.onboardingStage);

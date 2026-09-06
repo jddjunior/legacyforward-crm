@@ -18,7 +18,7 @@ Multi-tenant CRM & agency operations platform (LegacyForward CRM). Built with Ne
 `docker-compose.base44.yml` brings up three services:
 - `db` — Postgres 16
 - `redis` — Redis 7
-- `web` — Node 22 with source bind-mounted, runs `npm install && prisma generate && prisma db push && seed && next dev`
+- `web` — Node 22 with source bind-mounted, runs `npm install && prisma generate && prisma migrate deploy && bootstrap-app-role && seed && next dev`
 
 First boot installs deps, pushes schema, seeds demo data, then starts the dev server. Subsequent restarts reuse the named volumes (`lf_node_modules`, `lf_next`) and are fast.
 
@@ -72,7 +72,9 @@ src/
     PipelineBoard.tsx    # Drag-and-drop kanban (client component)
     PitchClient.tsx       # Proposal preview with viewport toggle
   lib/
-    db.ts                 # Prisma client
+    db.ts                 # ADMIN Prisma client — bypasses RLS, auth/webhooks/scripts only
+    rls.ts                # forSession()/forOrg() — tenant-scoped client, use this in features
+    audit.ts              # writeAudit() — append-only audit trail
     format.ts             # badgeClass/money/date/duration helpers shared by agency pages
     session.ts            # JWT sign/verify (jose)
     auth.ts               # getSession/requireSession helpers
@@ -111,3 +113,35 @@ docker compose -f docker-compose.base44.yml exec web sh scripts/debug-auth.sh
 - WorkOS's `/user_management/authenticate` needs the key as `client_secret` in the body (that's how the SDK v7 calls it) — a Bearer-only request returns `invalid_client`.
 - If the sign-in lands on `redirect-uri-invalid`, the preview host changed: add `<public-preview-url>/api/auth/callback` under WorkOS dashboard → Authentication → Redirects. The public preview URL derives from `BASE44_PUBLIC_HOST_SUFFIX` (see `src/lib/origin.ts`).
 - `scripts/debug-auth.sh` uses throwaway test user `debug-tester@legacyforward.test` (password in the script).
+
+
+## Multi-tenancy: row-level security (Build Plan §1.1)
+
+Tenant isolation is enforced by Postgres, **not** by application `where` clauses.
+
+- **Two database roles.** `DATABASE_URL` is the owner role (migrations, auth, webhooks, seeds) and
+  bypasses RLS. `APP_DATABASE_URL` is `app_user`, created `NOBYPASSRLS` by the RLS migration; the
+  bootstrap script attaches its password from `APP_DB_PASSWORD` so no credential lives in SQL.
+- **Feature code must use `forSession(session)` / `forOrg(orgId)` from `lib/rls.ts`**, never the
+  `prisma` export from `lib/db.ts`. Every portal page and server action already does. The scoped
+  client wraps each query in a transaction that runs
+  `set_config('app.org_id', …, true)`, because policies read that setting and `SET LOCAL` only
+  survives its own transaction — this is why the extension uses the array form of `$transaction`.
+- **Policies default to deny.** With no `app.org_id` set, `"orgId" = current_org_id()` is NULL,
+  so zero rows match. Forgetting the context fails closed, not open.
+- **Agency cross-tenant access** is a deliberate exception: `forSession()` sets
+  `app.agency_access=on` only for an `agency_admin` session, which is what lets the agency console
+  read every client. Audit those paths with `writeAudit()`.
+- **`AuditLog` is append-only.** No UPDATE/DELETE policy exists, the grants are revoked, and a
+  trigger raises on either — so even the owner role cannot rewrite history. Tests that need to clean
+  up must `ALTER TABLE "AuditLog" DISABLE TRIGGER audit_log_no_mutate` first.
+- **`Payment.orgId` is nullable** (pre-account pitch payments), so those rows are invisible to
+  `app_user`; handle them with the admin client in webhook/checkout paths.
+
+**Schema changes now go through migrations** (`npx prisma migrate dev --name …`), not `db push` —
+`db push` would drop the policies. `00000000000000_init` is the baseline of the pre-existing schema;
+`00000000000001_row_level_security` adds roles, policies and the audit trigger.
+
+Verify the gate with `npm run test:isolation` (22 assertions; also runs in CI via
+`.github/workflows/tenant-isolation.yml`). It deliberately issues queries with **no** org filter, so
+a pass is attributable to RLS alone.

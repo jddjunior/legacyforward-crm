@@ -1,23 +1,28 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { requireSession } from '@/lib/auth';
+import { writeAudit } from '@/lib/audit';
 
 export async function approveItem(id: string) {
   const session = await requireSession();
-  await prisma.approval.updateMany({
+  const db = forSession(session);
+  await db.approval.updateMany({
     where: { id, orgId: session.orgId },
     data: { status: 'approved' },
   });
+  await writeAudit(session, { action: 'approved', entity: 'Approval', entityId: id });
   revalidatePath('/portal/approvals');
 }
 
 export async function rejectItem(id: string) {
   const session = await requireSession();
-  await prisma.approval.updateMany({
+  const db = forSession(session);
+  await db.approval.updateMany({
     where: { id, orgId: session.orgId },
     data: { status: 'rejected' },
   });
+  await writeAudit(session, { action: 'rejected', entity: 'Approval', entityId: id });
   revalidatePath('/portal/approvals');
 }

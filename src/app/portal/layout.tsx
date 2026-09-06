@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { getSession } from '@/lib/auth';
 import Sidebar from '@/components/portal/Sidebar';
 import { ONBOARDING_ORDER } from '@/lib/onboarding';
@@ -8,15 +8,18 @@ import { ONBOARDING_ORDER } from '@/lib/onboarding';
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   if (!session) redirect('/api/auth/login');
+  if (!session.orgId) redirect('/api/auth/login');
 
-  const org = session.orgId ? await prisma.org.findUnique({ where: { id: session.orgId } }) : null;
+  const db = forSession(session);
+
+  const org = await db.org.findUnique({ where: { id: session.orgId } });
   const isActive = org?.onboardingStage === 'active';
   const stageIndex = org ? ONBOARDING_ORDER.indexOf(org.onboardingStage) : 0;
   const userName = session.name || session.email.split('@')[0];
 
   const [pendingCount, liveCount] = await Promise.all([
-    prisma.approval.count({ where: { orgId: session.orgId, status: 'pending' } }),
-    prisma.lead.count({ where: { orgId: session.orgId, status: 'new' } }),
+    db.approval.count({ where: { orgId: session.orgId, status: 'pending' } }),
+    db.lead.count({ where: { orgId: session.orgId, status: 'new' } }),
   ]);
   const setupProgress = Math.max(0, ONBOARDING_ORDER.indexOf(org?.onboardingStage || 'proposal_sent'));
   const wikiPct = Math.min(100, Math.round((setupProgress / (ONBOARDING_ORDER.length - 1)) * 100));

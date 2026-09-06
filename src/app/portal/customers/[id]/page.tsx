@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { getSession } from '@/lib/auth';
 import Link from 'next/link';
 import { ArrowLeft, Mail, Phone, MapPin } from 'lucide-react';
@@ -8,10 +8,12 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
   const session = await getSession();
   if (!session?.orgId) return null;
 
-  const customer = await prisma.customer.findFirst({ where: { id: params.id, orgId: session.orgId } });
+  const db = forSession(session);
+
+  const customer = await db.customer.findFirst({ where: { id: params.id, orgId: session.orgId } });
   if (!customer) return <div className="p-8 text-[#6b6b74]">Customer not found.</div>;
 
-  const deals = await prisma.deal.findMany({ where: { orgId: session.orgId } });
+  const deals = await db.deal.findMany({ where: { orgId: session.orgId } });
   const customerDeals = deals.filter(d => d.title.includes(customer.name.split(' ')[0]));
 
   return (

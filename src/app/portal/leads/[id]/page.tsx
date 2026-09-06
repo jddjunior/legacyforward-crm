@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { getSession } from '@/lib/auth';
 import { updateLeadStatus } from '@/app/actions/leads';
 import { addLeadNote } from '@/app/actions/lead-detail';
@@ -10,7 +10,9 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
   const session = await getSession();
   if (!session?.orgId) return null;
 
-  const lead = await prisma.lead.findFirst({ where: { id: params.id, orgId: session.orgId } });
+  const db = forSession(session);
+
+  const lead = await db.lead.findFirst({ where: { id: params.id, orgId: session.orgId } });
   if (!lead) return <div className="p-8 text-[#6b6b74]">Lead not found.</div>;
 
   const statuses = ['new', 'contacted', 'qualified', 'lost'];

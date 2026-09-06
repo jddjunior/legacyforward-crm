@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { getSession } from '@/lib/auth';
 import Header from '@/components/portal/Header';
 import RouteShell from '@/components/portal/RouteShell';
@@ -8,7 +8,9 @@ export default async function CustomersPage() {
   const session = await getSession();
   if (!session?.orgId) return null;
 
-  const dbCustomers = await prisma.customer.findMany({ where: { orgId: session.orgId }, orderBy: { createdAt: 'desc' } });
+  const db = forSession(session);
+
+  const dbCustomers = await db.customer.findMany({ where: { orgId: session.orgId }, orderBy: { createdAt: 'desc' } });
 
   const custRaw = dbCustomers.map(c => ({
     company: c.name,

@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { getSession } from '@/lib/auth';
 import Header from '@/components/portal/Header';
 import RouteShell from '@/components/portal/RouteShell';
@@ -9,7 +9,9 @@ export default async function PipelinePage() {
   const session = await getSession();
   if (!session?.orgId) return null;
 
-  const dbDeals = await prisma.deal.findMany({ where: { orgId: session.orgId }, orderBy: { createdAt: 'desc' } });
+  const db = forSession(session);
+
+  const dbDeals = await db.deal.findMany({ where: { orgId: session.orgId }, orderBy: { createdAt: 'desc' } });
 
   const deals = dbDeals.map(d => ({
     id: d.id, name: d.title, company: d.title, value: d.value,

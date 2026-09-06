@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { getSession } from '@/lib/auth';
 import Header from '@/components/portal/Header';
 import RouteShell from '@/components/portal/RouteShell';
@@ -8,7 +8,9 @@ export default async function DocumentsPage() {
   const session = await getSession();
   if (!session?.orgId) return null;
 
-  const docs = await prisma.document.findMany({
+  const db = forSession(session);
+
+  const docs = await db.document.findMany({
     where: { orgId: session.orgId },
     orderBy: { updatedAt: 'desc' },
   });

@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { getSession } from '@/lib/auth';
 import { Check, Clock, AlertCircle } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
@@ -16,7 +16,9 @@ export default async function ConnectionsPage() {
   const session = await getSession();
   if (!session?.orgId) return null;
 
-  const connections = await prisma.connection.findMany({
+  const db = forSession(session);
+
+  const connections = await db.connection.findMany({
     where: { orgId: session.orgId },
   });
 

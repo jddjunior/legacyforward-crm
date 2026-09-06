@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { getSession } from '@/lib/auth';
 import Header from '@/components/portal/Header';
 import RouteShell from '@/components/portal/RouteShell';
@@ -15,9 +15,11 @@ export default async function WebsitePage() {
   const session = await getSession();
   if (!session?.orgId) return null;
 
+  const db = forSession(session);
+
   const [pages, openChanges] = await Promise.all([
-    prisma.websitePage.findMany({ where: { orgId: session.orgId }, orderBy: { createdAt: 'asc' } }),
-    prisma.changeRequest.count({ where: { proposal: { orgId: session.orgId }, status: 'pending' } }),
+    db.websitePage.findMany({ where: { orgId: session.orgId }, orderBy: { createdAt: 'asc' } }),
+    db.changeRequest.count({ where: { proposal: { orgId: session.orgId }, status: 'pending' } }),
   ]);
 
   const kpis = [

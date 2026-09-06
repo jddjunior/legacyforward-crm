@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { getSession } from '@/lib/auth';
 import Header from '@/components/portal/Header';
 import RouteShell from '@/components/portal/RouteShell';
@@ -8,9 +8,11 @@ export default async function LeadsPage() {
   const session = await getSession();
   if (!session?.orgId) return null;
 
+  const db = forSession(session);
+
   const [dbLeads, dbDeals] = await Promise.all([
-    prisma.lead.findMany({ where: { orgId: session.orgId }, orderBy: { createdAt: 'desc' } }),
-    prisma.deal.findMany({ where: { orgId: session.orgId, stage: { not: 'won' } } }),
+    db.lead.findMany({ where: { orgId: session.orgId }, orderBy: { createdAt: 'desc' } }),
+    db.deal.findMany({ where: { orgId: session.orgId, stage: { not: 'won' } } }),
   ]);
 
   const leadRows = dbLeads.map(l => {

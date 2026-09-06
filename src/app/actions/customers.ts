@@ -1,14 +1,16 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { requireSession } from '@/lib/auth';
+import { writeAudit } from '@/lib/audit';
 
 export async function createCustomer(formData: FormData) {
   const session = await requireSession();
+  const db = forSession(session);
   if (!session.orgId) throw new Error('No org');
 
-  await prisma.customer.create({
+  await db.customer.create({
     data: {
       orgId: session.orgId,
       name: String(formData.get('name')),
@@ -23,6 +25,8 @@ export async function createCustomer(formData: FormData) {
 
 export async function deleteCustomer(id: string) {
   const session = await requireSession();
-  await prisma.customer.deleteMany({ where: { id, orgId: session.orgId } });
+  const db = forSession(session);
+  await db.customer.deleteMany({ where: { id, orgId: session.orgId } });
+  await writeAudit(session, { action: 'deleted', entity: 'Customer', entityId: id });
   revalidatePath('/portal/customers');
 }

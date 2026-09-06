@@ -1,14 +1,16 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { prisma } from '@/lib/db';
+import { forSession } from '@/lib/rls';
 import { requireSession } from '@/lib/auth';
+import { writeAudit } from '@/lib/audit';
 
 export async function createLead(formData: FormData) {
   const session = await requireSession();
+  const db = forSession(session);
   if (!session.orgId) throw new Error('No org');
 
-  await prisma.lead.create({
+  await db.lead.create({
     data: {
       orgId: session.orgId,
       name: String(formData.get('name')),
@@ -23,7 +25,8 @@ export async function createLead(formData: FormData) {
 
 export async function updateLeadStatus(id: string, status: string) {
   const session = await requireSession();
-  await prisma.lead.updateMany({
+  const db = forSession(session);
+  await db.lead.updateMany({
     where: { id, orgId: session.orgId },
     data: { status },
   });
@@ -32,6 +35,8 @@ export async function updateLeadStatus(id: string, status: string) {
 
 export async function deleteLead(id: string) {
   const session = await requireSession();
-  await prisma.lead.deleteMany({ where: { id, orgId: session.orgId } });
+  const db = forSession(session);
+  await db.lead.deleteMany({ where: { id, orgId: session.orgId } });
+  await writeAudit(session, { action: 'deleted', entity: 'Lead', entityId: id });
   revalidatePath('/portal/leads');
 }
