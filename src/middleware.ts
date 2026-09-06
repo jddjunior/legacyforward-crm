@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/session';
 
-const PUBLIC_PATHS = ['/', '/pitch', '/api/auth', '/api/stripe-webhook', '/api/health'];
+// Public by necessity: the pitch page and its checkout run before an account
+// exists, and provider webhooks arrive with no session at all — they
+// authenticate by signature instead (see api/webhooks/stripe).
+const PUBLIC_PATHS = [
+  '/',
+  '/pitch',
+  '/api/auth',
+  '/api/webhooks',
+  '/api/payments',
+  '/api/health',
+];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

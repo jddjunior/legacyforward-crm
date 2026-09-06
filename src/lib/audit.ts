@@ -23,7 +23,8 @@ export type AuditAction =
   | 'impersonated'
   | 'invited'
   | 'connection_changed'
-  | 'stage_advanced';
+  | 'stage_advanced'
+  | 'stage_changed';
 
 export async function writeAudit(
   session: SessionPayload,

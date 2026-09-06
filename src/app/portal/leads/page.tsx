@@ -1,14 +1,10 @@
-import { forSession } from '@/lib/rls';
-import { getSession } from '@/lib/auth';
+import { requireActiveOrgPage } from '@/lib/gate';
 import Header from '@/components/portal/Header';
 import RouteShell from '@/components/portal/RouteShell';
 import LeadsView from '@/components/portal/LeadsView';
 
 export default async function LeadsPage() {
-  const session = await getSession();
-  if (!session?.orgId) return null;
-
-  const db = forSession(session);
+  const { session, db } = await requireActiveOrgPage();
 
   const [dbLeads, dbDeals] = await Promise.all([
     db.lead.findMany({ where: { orgId: session.orgId }, orderBy: { createdAt: 'desc' } }),

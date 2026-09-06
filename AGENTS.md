@@ -145,3 +145,33 @@ Tenant isolation is enforced by Postgres, **not** by application `where` clauses
 Verify the gate with `npm run test:isolation` (22 assertions; also runs in CI via
 `.github/workflows/tenant-isolation.yml`). It deliberately issues queries with **no** org filter, so
 a pass is attributable to RLS alone.
+
+## Phase 1 — payments, stage machine, CRM gate
+
+- **Payment truth comes from the Stripe webhook** (`/api/webhooks/stripe`), not from the browser
+  returning to `/api/payments/success` — a customer who closes the tab must still be onboarded.
+  The success route remains as a UX redirect only.
+- **`STRIPE_WEBHOOK_SECRET` is not set in this environment** (deliberately declined). The route
+  fails closed: with no secret it returns 500 and processes nothing, so live events are rejected
+  until the secret is supplied. To enable it, add the secret from Stripe → Developers → Webhooks
+  (endpoint `/api/webhooks/stripe`), or `stripe listen --forward-to localhost:3000/api/webhooks/stripe`.
+- **Webhooks and pitch checkout must stay in `PUBLIC_PATHS`** in `src/middleware.ts`. Both run with
+  no session — the webhook authenticates by signature. The list previously named a nonexistent
+  `/api/stripe-webhook`, which silently 307'd every delivery to the login page; if you rename the
+  route, update the allowlist or deliveries die invisibly.
+- **Idempotency**: `withIdempotency()` (`src/lib/idempotency.ts`) claims `(source, eventId)` in
+  `ProcessedEvent` *before* running the handler, so concurrent retries execute it once. A handler
+  that throws releases its claim so the provider's retry genuinely reprocesses.
+- **`ProcessedEvent` has RLS enabled with no policy** — it is infrastructure, not tenant data, and
+  is only ever touched by the admin client.
+- **Onboarding stages move one step forward at a time** (`src/lib/onboarding.ts`). `nextStage()`
+  never moves an org backwards, so a replayed `checkout.session.completed` cannot drag an active
+  account back to `payment_complete`.
+- **The CRM gate is server-side** (`src/lib/gate.ts`). The dimmed CRM in the pitch is cosmetic;
+  `requireActiveOrg()` / `requireActiveOrgPage()` refuse CRM data until the org reaches `active`.
+  Agency roles are exempt so staff can work accounts mid-onboarding. Onboarding, profile, settings
+  and connections stay ungated so an org can finish setup.
+- **`DealStageEvent` is append-only for tenants** (UPDATE/DELETE revoked), like `AuditLog`. Every
+  `moveDeal` writes one history row plus an audit entry.
+
+Verify with `npm test` (isolation + Phase 1 = 41 assertions) or `npm run test:phase1`.

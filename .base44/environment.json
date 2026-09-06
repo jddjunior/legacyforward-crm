@@ -3,8 +3,25 @@
   "healthPath": "/api/health",
   "startCommand": "docker compose -f docker-compose.base44.yml up -d",
   "secrets": [
-    { "name": "WORKOS_API_KEY", "description": "WorkOS API key from your WorkOS dashboard → API Keys page", "requiredAtBoot": false },
-    { "name": "WORKOS_CLIENT_ID", "description": "WorkOS Client ID from your WorkOS dashboard → API Keys page", "requiredAtBoot": false },
-    { "name": "STRIPE_SECRET_KEY", "description": "Stripe secret key (sk_test_...) from your Stripe dashboard → Developers → API keys", "requiredAtBoot": false }
+    {
+      "name": "WORKOS_API_KEY",
+      "description": "WorkOS API key from your WorkOS dashboard \u2192 API Keys page",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "WORKOS_CLIENT_ID",
+      "description": "WorkOS Client ID from your WorkOS dashboard \u2192 API Keys page",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "STRIPE_SECRET_KEY",
+      "description": "Stripe secret key (sk_test_...) from your Stripe dashboard \u2192 Developers \u2192 API keys",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "STRIPE_WEBHOOK_SECRET",
+      "description": "Stripe webhook signing secret (whsec_...) from Stripe dashboard -> Developers -> Webhooks -> your /api/webhooks/stripe endpoint -> Signing secret. Without it the webhook route fails closed and no payment events are processed.",
+      "requiredAtBoot": false
+    }
   ]
 }

@@ -1,14 +1,10 @@
-import { forSession } from '@/lib/rls';
-import { getSession } from '@/lib/auth';
+import { requireActiveOrgPage } from '@/lib/gate';
 import Header from '@/components/portal/Header';
 import RouteShell from '@/components/portal/RouteShell';
 import CustomersView from '@/components/portal/CustomersView';
 
 export default async function CustomersPage() {
-  const session = await getSession();
-  if (!session?.orgId) return null;
-
-  const db = forSession(session);
+  const { session, db } = await requireActiveOrgPage();
 
   const dbCustomers = await db.customer.findMany({ where: { orgId: session.orgId }, orderBy: { createdAt: 'desc' } });
 

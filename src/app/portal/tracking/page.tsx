@@ -1,12 +1,8 @@
-import { forSession } from '@/lib/rls';
-import { getSession } from '@/lib/auth';
+import { requireActiveOrgPage } from '@/lib/gate';
 import PageHeader from '@/components/PageHeader';
 
 export default async function TrackingPage() {
-  const session = await getSession();
-  if (!session?.orgId) return null;
-
-  const db = forSession(session);
+  const { session, db } = await requireActiveOrgPage();
 
   const leads = await db.lead.findMany({
     where: { orgId: session.orgId },

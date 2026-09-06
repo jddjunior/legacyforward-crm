@@ -2,22 +2,25 @@
 // Shared by the portal layout, the pitch backdrop, the payment webhooks and
 // the server-side CRM gate.
 
-export const ONBOARDING_ORDER = [
+const STAGES = [
   'proposal_sent', 'proposal_approved', 'payment_complete', 'account_created',
   'brand_uploaded', 'connections_linked', 'reviews_approved', 'active',
 ] as const;
 
-export type OnboardingStage = (typeof ONBOARDING_ORDER)[number];
+export type OnboardingStage = (typeof STAGES)[number];
+
+/** Widened to string[] so callers can index it with a raw DB value. */
+export const ONBOARDING_ORDER: readonly string[] = STAGES;
 
 /** The stage at which the CRM becomes real rather than a dimmed preview. */
 export const ACTIVE_STAGE: OnboardingStage = 'active';
 
 export function isStage(value: string): value is OnboardingStage {
-  return (ONBOARDING_ORDER as readonly string[]).includes(value);
+  return (STAGES as readonly string[]).includes(value);
 }
 
 export function stageIndex(stage: string) {
-  return ONBOARDING_ORDER.indexOf(stage as OnboardingStage);
+  return (STAGES as readonly string[]).indexOf(stage);
 }
 
 /**

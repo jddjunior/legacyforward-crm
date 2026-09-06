@@ -1,14 +1,10 @@
-import { forSession } from '@/lib/rls';
-import { getSession } from '@/lib/auth';
+import { requireActiveOrgPage } from '@/lib/gate';
 import Header from '@/components/portal/Header';
 import RouteShell from '@/components/portal/RouteShell';
 import CallsView from '@/components/portal/CallsView';
 
 export default async function LiveCallsPage() {
-  const session = await getSession();
-  if (!session?.orgId) return null;
-
-  const db = forSession(session);
+  const { session, db } = await requireActiveOrgPage();
 
   const calls = await db.callRecord.findMany({
     where: { orgId: session.orgId },
