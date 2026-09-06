@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
 import PitchClient from '@/components/PitchClient';
+import PortalBackdrop from '@/components/pitch/PortalBackdrop';
 
 export default async function PitchPage({ params }: { params: { token: string } }) {
   const proposal = await prisma.proposal.findUnique({
@@ -42,6 +43,8 @@ export default async function PitchPage({ params }: { params: { token: string } 
       pages={pages}
       stripeEnabled={!!stripeEnabled}
       reviews={reviews}
-    />
+    >
+      <PortalBackdrop orgId={proposal.orgId} />
+    </PitchClient>
   );
 }

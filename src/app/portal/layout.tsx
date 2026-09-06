@@ -3,11 +3,7 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import Sidebar from '@/components/portal/Sidebar';
-
-const ONBOARDING_ORDER = [
-  'proposal_sent', 'proposal_approved', 'payment_complete', 'account_created',
-  'brand_uploaded', 'connections_linked', 'reviews_approved', 'active',
-];
+import { ONBOARDING_ORDER } from '@/lib/onboarding';
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();

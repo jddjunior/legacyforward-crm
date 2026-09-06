@@ -17,6 +17,7 @@ export default function PitchClient({
   pages,
   stripeEnabled,
   reviews,
+  children,
 }: {
   proposalId: string;
   orgName: string;
@@ -24,6 +25,7 @@ export default function PitchClient({
   pages: ProposalPageDef[];
   stripeEnabled: boolean;
   reviews: GatewayReview[];
+  children?: React.ReactNode;
 }) {
   const [stage, setStage] = useState<GateStage>('preview');
   const [changes, setChanges] = useState<ChangeRequest[]>([]);
@@ -63,7 +65,10 @@ export default function PitchClient({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[rgba(23,23,26,0.42)]" style={{ padding: '2.5vh 2vw' }}>
+    <>
+      {/* Blurred CRM portal behind the gateway — unlocks after payment and onboarding */}
+      {children}
+      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[rgba(23,23,26,0.42)]" style={{ padding: '2.5vh 2vw' }}>
       <div className="w-full h-full md:w-[80vw] md:max-w-[1480px] md:h-[86vh] bg-white border border-[#c6c6ce] rounded-[13px] shadow-[0_40px_90px_rgba(23,23,26,0.32)] flex flex-col overflow-hidden">
         <GateHeader stage={stage} stagedLabel={stagedLabel} />
         {stage === 'preview' && (
@@ -82,6 +87,7 @@ export default function PitchClient({
         {stage === 'access' && <AccessStage onCreated={() => setStage('setup')} />}
         {stage === 'setup' && <SetupStage reviews={reviews} onEnter={enterPortal} />}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
