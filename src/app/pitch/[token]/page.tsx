@@ -4,7 +4,7 @@ import PitchClient from '@/components/PitchClient';
 export default async function PitchPage({ params }: { params: { token: string } }) {
   const proposal = await prisma.proposal.findUnique({
     where: { token: params.token },
-    include: { org: true },
+    include: { org: { include: { reviews: true } } },
   });
 
   if (!proposal) {
@@ -20,13 +20,28 @@ export default async function PitchPage({ params }: { params: { token: string } 
 
   const pages = (proposal.pages as any[]) || [{ name: 'Home', sections: [] }];
   const stripeEnabled = process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY !== 'sk_test_placeholder';
+  const stagedLabel = proposal.updatedAt.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
+  const reviews = proposal.org.reviews.map((r) => ({
+    id: r.id,
+    author: r.author,
+    platform: r.source,
+    rating: r.rating,
+    text: r.content || '',
+  }));
 
   return (
     <PitchClient
       proposalId={proposal.id}
+      orgName={proposal.org.name}
+      stagedLabel={stagedLabel}
       pages={pages}
-      title={proposal.title}
       stripeEnabled={!!stripeEnabled}
+      reviews={reviews}
     />
   );
 }
