@@ -22,6 +22,8 @@ Multi-tenant CRM & agency operations platform (LegacyForward CRM). Built with Ne
 
 First boot installs deps, pushes schema, seeds demo data, then starts the dev server. Subsequent restarts reuse the named volumes (`lf_node_modules`, `lf_next`) and are fast.
 
+**After editing `prisma/schema.prisma`, restart the `web` service** (`docker compose -f docker-compose.base44.yml restart web`) — `prisma generate` only runs at container startup, so a running dev server keeps a stale client and new models fail with `Cannot read properties of undefined (reading 'findMany')`.
+
 ## Secrets
 
 Three secrets in `/run/base44/app.env` (all optional — app boots with placeholders):
