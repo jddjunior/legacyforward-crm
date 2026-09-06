@@ -35,6 +35,11 @@ model Org {
   connections  Connection[]
   auditLogs    AuditLog[]
   payments     Payment[]
+  socialPosts  SocialPost[]
+  seoKeywords  SeoKeyword[]
+  callRecords  CallRecord[]
+  documents   Document[]
+  websitePages WebsitePage[]
 }
 
 model User {
@@ -239,6 +244,104 @@ model Connection {
   provider  String   // google_ads, meta, callrail, stripe, etc.
   status    String   @default("pending") // pending, connected, error
   metadata  Json?
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+// ── Content calendar (socials + ads) ─────────────────────
+
+model SocialPost {
+  id           String   @id @default(cuid())
+  orgId        String
+  kind         String   // social, ad
+  platform     String   // instagram, facebook, google_ads, ctv, …
+  title        String
+  copy         String?
+  scheduledFor DateTime
+  status       String   @default("awaiting_approval") // awaiting_approval, approved, changes_requested, published
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+// ── SEO rank tracking ───────────────────────────────────
+
+model SeoKeyword {
+  id          String @id @default(cuid())
+  orgId       String
+  term        String
+  landingPage String
+  position    Int
+  change      Int    // signed positions moved since last pull
+  volume      Int    // monthly searches
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+// ── Live calls (copilot) ─────────────────────────────────
+
+model CallRecord {
+  id          String   @id @default(cuid())
+  orgId       String
+  callerName  String
+  phone       String?
+  repName     String?
+  durationSec Int      @default(0)
+  status      String   @default("ended") // live, ended, missed
+  sentiment   String?  // Warming, Neutral, Cooling
+  summary     String?
+  transcript  Json?    // [{ who: "lead" | "rep", text }]
+  startedAt   DateTime @default(now())
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([orgId])
+}
+
+// ── Documents (brand wiki) ───────────────────────────────
+
+model Document {
+  id       String   @id @default(cuid())
+  orgId    String
+  title    String
+  category String   // PDF, DOCX, TXT, …
+  content  String?
+  size     String?
+  status   String   @default("indexed") // processing, indexed, locked
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+// ── Website pages (build status) ─────────────────────────
+
+model WebsitePage {
+  id     String  @id @default(cuid())
+  orgId  String
+  title  String
+  path   String
+  status String  @default("live") // building, in_review, live, needs_work
+  note   String?
 
   org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
 

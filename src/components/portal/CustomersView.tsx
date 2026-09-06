@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { money } from '@/lib/design/data';
+import { createCustomer } from '@/app/actions/customers';
 
 export interface CustomerRow {
   company: string;
@@ -36,6 +37,8 @@ export default function CustomersView({ customers }: { customers: CustomerRow[] 
   const [health, setHealth] = useState<string[]>([]);
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('value');
+  const [showForm, setShowForm] = useState(false);
+  const [, startTransition] = useTransition();
 
   const activeView = CUST_VIEWS.find(v => v.id === view) || CUST_VIEWS[0];
   const q = query.trim().toLowerCase();
@@ -74,8 +77,21 @@ export default function CustomersView({ customers }: { customers: CustomerRow[] 
           <span style={{ marginLeft: 'auto', fontSize: 12.5, color: '#5f5f66' }}>
             {customers.length} accounts · {money(filtered.reduce((a, b) => a + b.value, 0))} contracted
           </span>
-          <button type="button" style={{ height: 32, padding: '0 14px', borderRadius: 999, border: 'none', background: '#146c43', color: '#ffffff', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Add customer</button>
+          <button type="button" onClick={() => setShowForm(v => !v)} style={{ height: 32, padding: '0 14px', borderRadius: 999, border: 'none', background: '#146c43', color: '#ffffff', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Add customer</button>
         </div>
+        {showForm && (
+          <form
+            action={(fd) => { startTransition(() => { createCustomer(fd); }); setShowForm(false); }}
+            style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: 10 }}
+          >
+            <input name="name" required placeholder="Company *" style={{ height: 34, borderRadius: 11, border: '1px solid #e2ded4', padding: '0 12px', fontSize: 12.5 }} />
+            <input name="email" type="email" placeholder="Contact email" style={{ height: 34, borderRadius: 11, border: '1px solid #e2ded4', padding: '0 12px', fontSize: 12.5 }} />
+            <input name="phone" placeholder="Phone" style={{ height: 34, borderRadius: 11, border: '1px solid #e2ded4', padding: '0 12px', fontSize: 12.5 }} />
+            <input name="address" placeholder="Address" style={{ height: 34, borderRadius: 11, border: '1px solid #e2ded4', padding: '0 12px', fontSize: 12.5 }} />
+            <input name="value" type="number" min="0" step="1" placeholder="Contract value ($)" style={{ height: 34, borderRadius: 11, border: '1px solid #e2ded4', padding: '0 12px', fontSize: 12.5 }} />
+            <button type="submit" style={{ height: 34, padding: '0 14px', borderRadius: 11, border: 'none', background: '#146c43', color: '#ffffff', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Create account</button>
+          </form>
+        )}
         <div style={{ marginTop: 11, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {CUST_VIEWS.map(v => {
             const on = v.id === view;

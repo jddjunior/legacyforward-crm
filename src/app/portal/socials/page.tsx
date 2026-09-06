@@ -1,4 +1,34 @@
-import PlaceholderPage from '@/components/PlaceholderPage';
-export default function Page() {
-  return <PlaceholderPage title="Socials" description="Scheduled-post calendar across Instagram, TikTok, LinkedIn, and Facebook." />;
+import { prisma } from '@/lib/db';
+import { getSession } from '@/lib/auth';
+import Header from '@/components/portal/Header';
+import RouteShell from '@/components/portal/RouteShell';
+import ContentCalendar from '@/components/portal/ContentCalendar';
+
+export default async function SocialsPage() {
+  const session = await getSession();
+  if (!session?.orgId) return null;
+
+  const posts = await prisma.socialPost.findMany({
+    where: { orgId: session.orgId, kind: 'social' },
+    orderBy: { scheduledFor: 'asc' },
+  });
+
+  return (
+    <>
+      <Header title="Socials" desc="Scheduled content — click any item to review" pendingCount={0} />
+      <RouteShell>
+        <ContentCalendar
+          monthLabel={new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}
+          posts={posts.map(p => ({
+            id: p.id,
+            platform: p.platform,
+            title: p.title,
+            copy: p.copy,
+            status: p.status,
+            scheduledFor: p.scheduledFor.toISOString(),
+          }))}
+        />
+      </RouteShell>
+    </>
+  );
 }
