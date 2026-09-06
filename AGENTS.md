@@ -53,18 +53,27 @@ src/
       clients/            # Client list
       proposals/          # Proposal list
       approvals/          # Cross-client approval queue
+      queue/ inbox/       # Unified work queue; unified inbox (leads + missed calls + reviews)
+      reports/ health/    # Per-client performance; account health scoring
+      calendar/ content/  # Scheduled posts by day; social content studio
+      adaccounts/ agent/  # Ad platform links; call copilot + knowledge base
+      billing/ templates/ # Payments + Stripe setup; reusable service offers
+      onboarding/ team/   # Stage kanban; people and access
+      pitchlive/ audit/   # Live pitches + change requests; cross-client audit log
+      settings/           # Agency workspace config
     api/
       auth/               # login (WorkOS redirect), callback, logout
       payments/           # Stripe checkout + success handler
       proposals/[id]/approve/
       health/
   components/
+    agency/               # Shared agency UI: StatGrid, Panel + EmptyState, DataTable
     Sidebar.tsx           # Portal navigation
     PipelineBoard.tsx    # Drag-and-drop kanban (client component)
     PitchClient.tsx       # Proposal preview with viewport toggle
-    PlaceholderPage.tsx  # Coming-soon pages
   lib/
     db.ts                 # Prisma client
+    format.ts             # badgeClass/money/date/duration helpers shared by agency pages
     session.ts            # JWT sign/verify (jose)
     auth.ts               # getSession/requireSession helpers
     workos.ts             # WorkOS client
