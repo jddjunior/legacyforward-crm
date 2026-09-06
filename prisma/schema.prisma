@@ -18,6 +18,8 @@ model Org {
   // proposal_sent → proposal_approved → payment_complete → account_created
   // → brand_uploaded → connections_linked → reviews_approved → active
   stripeCustomerId String?
+  stripeSubscriptionId String?
+  subscriptionStatus   String?  // active, past_due, canceled
   brandColor      String?
   logoUrl         String?
   isAgency        Boolean  @default(false)
@@ -176,6 +178,7 @@ model Deal {
   stage      String   @default("lead") // lead, contacted, qualified, proposal, won, lost
 
   org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  stageEvents DealStageEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -349,4 +352,33 @@ model WebsitePage {
   updatedAt DateTime @updatedAt
 
   @@index([orgId])
+}
+
+/// Webhook/publish idempotency ledger (Build Plan §1.9).
+/// Providers retry deliveries; a processed event is never handled twice.
+model ProcessedEvent {
+  id          String   @id @default(cuid())
+  /// Provider's own event id, or an Idempotency-Key for publish actions.
+  eventId     String
+  source      String   // stripe, meta, google, composio, internal
+  eventType   String?
+  processedAt DateTime @default(now())
+
+  @@unique([source, eventId])
+}
+
+/// Deal stage history, so pipeline drags are auditable and reportable.
+model DealStageEvent {
+  id        String   @id @default(cuid())
+  orgId     String
+  dealId    String
+  fromStage String?
+  toStage   String
+  userId    String?
+  createdAt DateTime @default(now())
+
+  deal Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([dealId])
 }
