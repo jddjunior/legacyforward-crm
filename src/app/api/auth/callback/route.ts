@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { workos } from '@/lib/workos';
 import { prisma } from '@/lib/db';
-import { signSession, REMEMBER_ME_TTL_SECONDS, SESSION_TTL_SECONDS } from '@/lib/session';
+import { signSession, verifySession, REMEMBER_ME_TTL_SECONDS, SESSION_TTL_SECONDS } from '@/lib/session';
 import { verifyOAuthState } from '@/lib/oauth-state';
 import { getOrigin } from '@/lib/origin';
 
@@ -71,6 +71,16 @@ export async function GET(request: NextRequest) {
     });
     return response;
   } catch (err) {
+    // An authorization code is single-use, and browsers replay this URL for
+    // reasons outside our control (back button, refresh, link prefetch, a
+    // duplicated request). The first exchange already signed the user in, so
+    // treat a replay as success when a valid session cookie is present rather
+    // than throwing an already-authenticated user back to an error screen.
+    const existing = await verifySession(request.cookies.get('lf-session')?.value);
+    if (existing) {
+      return NextResponse.redirect(new URL('/portal', getOrigin(request)));
+    }
+
     console.error('Auth callback error:', err);
     return NextResponse.redirect(new URL('/?auth_error=1', getOrigin(request)));
   }
