@@ -11,7 +11,8 @@
     "db:studio": "prisma studio",
     "test:isolation": "tsx tests/tenant-isolation.test.ts",
     "test:phase1": "tsx tests/phase1-payments.test.ts",
-    "test": "npm run test:isolation && npm run test:phase1"
+    "test": "npm run test:isolation && npm run test:phase1 && npm run test:auth",
+    "test:auth": "tsx tests/auth-session.test.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.19.0",

@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { workos } from '@/lib/workos';
 import { prisma } from '@/lib/db';
-import { signSession } from '@/lib/session';
+import { signSession, REMEMBER_ME_TTL_SECONDS, SESSION_TTL_SECONDS } from '@/lib/session';
+import { verifyOAuthState } from '@/lib/oauth-state';
 import { getOrigin } from '@/lib/origin';
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code');
   if (!code) return NextResponse.redirect(new URL('/', request.url));
+
+  // Signed by us before the redirect; an unverifiable state means a normal session.
+  const { remember } = await verifyOAuthState(request.nextUrl.searchParams.get('state'));
+  const ttlSeconds = remember ? REMEMBER_ME_TTL_SECONDS : SESSION_TTL_SECONDS;
 
   try {
     const { user, sealedSession } = await workos.userManagement.authenticateWithCode({
@@ -42,13 +47,16 @@ export async function GET(request: NextRequest) {
 
     const firstMembership = memberships[0];
 
-    const sessionToken = await signSession({
-      userId: dbUser.id,
-      email: dbUser.email,
-      name: dbUser.name || undefined,
-      orgId: firstMembership?.orgId,
-      orgRole: firstMembership?.role,
-    });
+    const sessionToken = await signSession(
+      {
+        userId: dbUser.id,
+        email: dbUser.email,
+        name: dbUser.name || undefined,
+        orgId: firstMembership?.orgId,
+        orgRole: firstMembership?.role,
+      },
+      ttlSeconds,
+    );
 
     const response = NextResponse.redirect(new URL('/portal', getOrigin(request)));
     // SameSite=None + Secure is required for the session cookie to be sent
@@ -58,7 +66,8 @@ export async function GET(request: NextRequest) {
       secure: true,
       sameSite: 'none',
       path: '/',
-      maxAge: 7 * 24 * 60 * 60,
+      // Same ttl as the token itself, so cookie and session expire together.
+      maxAge: ttlSeconds,
     });
     return response;
   } catch (err) {
