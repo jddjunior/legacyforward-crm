@@ -19,7 +19,7 @@ export default function AgencySidebar() {
       <div className="h-[72px] flex items-center gap-3 px-5">
         <span className="w-8 h-8 rounded-lg bg-brand text-white flex items-center justify-center font-bold text-xs">LF</span>
         <div>
-          <div className="text-[15px] font-semibold tracking-tight">LegacyForward</div>
+          <div className="text-[15px] font-semibold tracking-tight">Branch Avenue</div>
           <div className="text-[10px] font-mono uppercase tracking-wider text-ink-subtle">Agency Console</div>
         </div>
       </div>

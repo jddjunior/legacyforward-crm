@@ -7,7 +7,7 @@ export default function LandingPage() {
         <div className="flex items-center gap-3 mb-8">
           <span className="w-11 h-11 rounded-xl bg-brand text-white flex items-center justify-center font-bold text-sm">LF</span>
           <div>
-            <div className="text-lg font-semibold tracking-tight">LegacyForward</div>
+            <div className="text-lg font-semibold tracking-tight">Branch Avenue</div>
             <div className="text-xs text-ink-muted font-mono uppercase tracking-wider">CRM & Agency Platform</div>
           </div>
         </div>

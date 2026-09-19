@@ -22,7 +22,7 @@ export default async function OnboardingPage() {
 
   return (
     <div className="p-8 max-w-2xl">
-      <h1 className="text-display mb-2">Welcome to LegacyForward</h1>
+      <h1 className="text-display mb-2">Welcome to Branch Avenue</h1>
       <p className="text-ink-muted text-sm mb-8">Let's get your account set up. This takes about 5 minutes.</p>
 
       {/* Progress */}

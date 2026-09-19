@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'LegacyForward CRM',
+  title: 'Branch Avenue CRM',
   description: 'Multi-tenant CRM & agency operations platform',
 };
 
