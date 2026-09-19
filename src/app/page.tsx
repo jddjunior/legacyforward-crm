@@ -26,6 +26,15 @@ export default function LandingPage() {
           </Link>
         </div>
 
+        <div className="mt-4 flex gap-3">
+          <a href="/api/auth/dev-login?email=owner@apex-roofing.com&next=/portal" className="btn flex-1 justify-center">
+            Demo client portal
+          </a>
+          <a href="/api/auth/dev-login?email=priya@lanternfield.com&next=/agency" className="btn flex-1 justify-center">
+            Demo agency console
+          </a>
+        </div>
+
         <div className="mt-8 pt-8 border-t border-ink-line">
           <div className="grid grid-cols-3 gap-4">
             <div>

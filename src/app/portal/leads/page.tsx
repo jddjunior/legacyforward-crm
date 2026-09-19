@@ -89,7 +89,7 @@ export default async function LeadsPage() {
                   </td>
                   <td className="px-5 py-3 text-ink-muted">{lead.createdAt.toLocaleDateString()}</td>
                   <td className="px-5 py-3">
-                    <form action={() => deleteLead(lead.id)}>
+                    <form action={deleteLead.bind(null, lead.id)}>
                       <button type="submit" className="text-xs text-red-500 hover:text-red-700">Delete</button>
                     </form>
                   </td>

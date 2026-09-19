@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/session';
 
-const PUBLIC_PATHS = ['/', '/pitch', '/api/auth', '/api/stripe-webhook', '/api/health'];
+const PUBLIC_PATHS = [
+  '/',
+  '/pitch',
+  '/api/auth',
+  '/api/stripe-webhook',
+  '/api/health',
+  // Public pitch-to-pay gateway: approve a proposal and start checkout without a session
+  '/api/proposals',
+  '/api/payments',
+];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -14,6 +23,9 @@ export async function middleware(request: NextRequest) {
   const session = await verifySession(request.cookies.get('lf-session')?.value);
 
   if (!session) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const loginUrl = new URL('/api/auth/login', request.url);
     return NextResponse.redirect(loginUrl);
   }

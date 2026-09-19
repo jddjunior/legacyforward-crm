@@ -73,7 +73,7 @@ export default async function CustomersPage() {
                   <td className="px-5 py-3">{c.value ? `$${(c.value / 100).toLocaleString()}` : '—'}</td>
                   <td className="px-5 py-3 text-ink-muted">{c.createdAt.toLocaleDateString()}</td>
                   <td className="px-5 py-3">
-                    <form action={() => deleteCustomer(c.id)}>
+                    <form action={deleteCustomer.bind(null, c.id)}>
                       <button type="submit" className="text-xs text-red-500 hover:text-red-700">Delete</button>
                     </form>
                   </td>

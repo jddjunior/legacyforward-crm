@@ -5,6 +5,7 @@ import { LayoutDashboard, Building2, FileText, CheckSquare } from 'lucide-react'
 import { prisma } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { signSession } from '@/lib/session';
+import AgencySidebar from '@/components/AgencySidebar';
 
 const navItems = [
   { id: '/agency', label: 'Dashboard', icon: LayoutDashboard },
@@ -19,7 +20,7 @@ export default async function AgencyLayout({ children }: { children: React.React
 
   // Find agency org for this user
   const membership = await prisma.membership.findFirst({
-    where: { userId: session.userId, role: 'agency_admin' },
+    where: { userId: session.userId, role: 'agency_admin', org: { isAgency: true } },
     include: { org: true },
   });
 

@@ -39,7 +39,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
           <h2 className="text-sm font-semibold mb-4">Status</h2>
           <div className="flex gap-2 flex-wrap">
             {statuses.map((s) => (
-              <form key={s} action={() => updateLeadStatus(lead.id, s)}>
+              <form key={s} action={updateLeadStatus.bind(null, lead.id, s)}>
                 <button
                   type="submit"
                   className={`badge cursor-pointer ${lead.status === s ? (s === 'qualified' ? 'badge-green' : s === 'lost' ? 'badge-red' : s === 'contacted' ? 'badge-blue' : 'badge-gray') : 'badge-gray opacity-50 hover:opacity-100'}`}

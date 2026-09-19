@@ -38,10 +38,10 @@ export default async function ApprovalsPage() {
               </span>
               {a.status === 'pending' && (
                 <div className="flex gap-2">
-                  <form action={() => approveItem(a.id)}>
+                  <form action={approveItem.bind(null, a.id)}>
                     <button type="submit" className="btn btn-primary text-xs h-8 px-3">Approve</button>
                   </form>
-                  <form action={() => rejectItem(a.id)}>
+                  <form action={rejectItem.bind(null, a.id)}>
                     <button type="submit" className="btn text-xs h-8 px-3 text-red-600 border-red-200">Reject</button>
                   </form>
                 </div>
