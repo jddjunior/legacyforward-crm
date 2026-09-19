@@ -6,7 +6,7 @@ import { getOrigin } from '@/lib/origin';
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code');
-  if (!code) return NextResponse.redirect(new URL('/', request.url));
+  if (!code) return NextResponse.redirect(new URL('/', getOrigin(request)));
 
   try {
     const { user, sealedSession } = await workos.userManagement.authenticateWithCode({
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       orgRole: firstMembership?.role,
     });
 
-    const response = NextResponse.redirect(new URL('/portal', request.url));
+    const response = NextResponse.redirect(new URL('/portal', getOrigin(request)));
     response.cookies.set('lf-session', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

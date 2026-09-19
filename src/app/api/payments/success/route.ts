@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const proposalId = request.nextUrl.searchParams.get('proposal_id');
 
   if (!sessionId || !proposalId) {
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL('/', getOrigin(request)));
   }
 
   try {
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.redirect(new URL('/portal?payment=success', request.url));
+    return NextResponse.redirect(new URL('/portal?payment=success', getOrigin(request)));
   } catch (err) {
     console.error('Payment success error:', err);
     return NextResponse.redirect(new URL('/?payment_error=1', getOrigin(request)));
