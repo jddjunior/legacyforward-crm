@@ -26,13 +26,20 @@ export default async function AgencyProposalsPage() {
           {proposals.map((p) => (
             <div key={p.id} className="card p-5 flex items-center gap-4">
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold">{p.title}</div>
-                <div className="text-xs text-ink-muted mt-0.5">{p.org.name} · {p.createdAt.toLocaleDateString()}</div>
+                <Link href={`/agency/proposals/${p.id}`} className="text-sm font-semibold hover:text-brand">{p.title}</Link>
+                <div className="text-xs text-ink-muted mt-0.5">
+                  {p.org.name} · {p.createdAt.toLocaleDateString()}
+                  {p.priceCents != null && ` · $${(p.priceCents / 100).toLocaleString('en-US')}`}
+                </div>
+                <div className="text-xs font-mono text-ink-subtle mt-1 truncate">
+                  {p.liveUrl || 'No live site URL set'}
+                </div>
               </div>
               <span className={`badge ${p.status === 'approved' ? 'badge-green' : p.status === 'rejected' ? 'badge-red' : 'badge-gray'}`}>
                 {p.status}
               </span>
-              <Link href={`/pitch/${p.token}`} className="text-xs text-brand">Open pitch link →</Link>
+              <Link href={`/agency/proposals/${p.id}`} className="text-xs text-brand">Manage →</Link>
+              <Link href={`/pitch/${p.token}`} className="text-xs text-brand">Pitch room →</Link>
             </div>
           ))}
         </div>

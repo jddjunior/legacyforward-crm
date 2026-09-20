@@ -59,6 +59,14 @@ export default function ProposalBuilder({ clientOrgs }: { clientOrgs: { id: stri
             {clientOrgs.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
           </select>
         </div>
+        <div>
+          <label className="label block mb-1.5">Live site URL</label>
+          <input name="liveUrl" type="url" className="input" placeholder="https://staging.client.com" />
+        </div>
+        <div>
+          <label className="label block mb-1.5">Project price (USD)</label>
+          <input name="price" inputMode="decimal" className="input" placeholder="4500" />
+        </div>
       </div>
 
       {/* Pages */}
