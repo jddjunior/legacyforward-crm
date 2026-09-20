@@ -20,6 +20,11 @@ model Org {
   stripeCustomerId String?
   brandColor      String?
   logoUrl         String?
+  // Kickoff details collected during post-approval onboarding
+  website         String?
+  contactName     String?
+  contactPhone    String?
+  goals           String?
   isAgency        Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
