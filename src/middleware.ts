@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/session';
-import { getOrigin } from '@/lib/origin';
 
 const PUBLIC_PATHS = [
   '/',
@@ -28,14 +27,13 @@ export async function middleware(request: NextRequest) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const loginUrl = new URL('/login', getOrigin(request));
-    loginUrl.searchParams.set('next', pathname);
-    return NextResponse.redirect(loginUrl);
+    const location = `/login?next=${encodeURIComponent(pathname)}`;
+    return new NextResponse(null, { status: 307, headers: { location } });
   }
 
   // Agency routes require agency_admin role
   if (pathname.startsWith('/agency') && session.orgRole !== 'agency_admin') {
-    return NextResponse.redirect(new URL('/portal', getOrigin(request)));
+    return new NextResponse(null, { status: 307, headers: { location: '/portal' } });
   }
 
   const response = NextResponse.next();

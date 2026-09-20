@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
 
     const destination =
       firstMembership?.role === 'agency_admin' && next === '/portal' ? '/agency' : next;
-    const response = NextResponse.redirect(new URL(destination, getOrigin(request)));
+    const response = new NextResponse(null, { status: 307, headers: { location: destination } });
     response.cookies.set(SESSION_COOKIE, sessionToken, sessionCookieOptions());
     return response;
   } catch (err) {

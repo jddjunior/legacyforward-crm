@@ -67,7 +67,7 @@ export default function PitchClient({
       {/* Toolbar */}
       <header className="flex items-center gap-4 px-6 py-3 border-b border-ink-line bg-white">
         <div className="flex items-center gap-2">
-          <span className="w-7 h-7 rounded-lg bg-brand text-white flex items-center justify-center font-bold text-[10px]">LF</span>
+          <span className="w-7 h-7 rounded-lg bg-brand text-white flex items-center justify-center font-bold text-[10px]">BA</span>
           <span className="text-sm font-semibold">{title}</span>
         </div>
 

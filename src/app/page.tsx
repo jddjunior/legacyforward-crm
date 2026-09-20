@@ -5,7 +5,7 @@ export default function LandingPage() {
     <div className="min-h-screen flex items-center justify-center bg-ink-surface">
       <div className="card max-w-lg w-full mx-4 p-10">
         <div className="flex items-center gap-3 mb-8">
-          <span className="w-11 h-11 rounded-xl bg-brand text-white flex items-center justify-center font-bold text-sm">LF</span>
+          <span className="w-11 h-11 rounded-xl bg-brand text-white flex items-center justify-center font-bold text-sm">BA</span>
           <div>
             <div className="text-lg font-semibold tracking-tight">Branch Avenue</div>
             <div className="text-xs text-ink-muted font-mono uppercase tracking-wider">CRM & Agency Platform</div>

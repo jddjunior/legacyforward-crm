@@ -13,5 +13,8 @@ export function sessionCookieOptions() {
     sameSite: (crossSite ? 'none' : 'lax') as 'none' | 'lax',
     path: '/',
     maxAge: 7 * 24 * 60 * 60,
+    // CHIPS: browsers that block third-party cookies still accept a partitioned
+    // one, which is what the cross-site preview iframe needs.
+    ...(crossSite ? { partitioned: true } : {}),
   };
 }

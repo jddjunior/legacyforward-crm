@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { signSession } from '@/lib/session';
-import { getOrigin } from '@/lib/origin';
 import { SESSION_COOKIE, sessionCookieOptions } from '@/lib/cookie';
 
 /**
@@ -32,7 +31,9 @@ export async function GET(request: NextRequest) {
   });
 
   const target = request.nextUrl.searchParams.get('next') || '/portal';
-  const response = NextResponse.redirect(new URL(target, getOrigin(request)));
+  // Relative Location: keeps the redirect on whatever host the browser used,
+  // so it never crosses origins behind the preview proxy.
+  const response = new NextResponse(null, { status: 307, headers: { location: target } });
   response.cookies.set(SESSION_COOKIE, token, sessionCookieOptions());
   return response;
 }

@@ -17,7 +17,7 @@ export default function AgencySidebar() {
   return (
     <aside className="w-60 flex-shrink-0 flex flex-col border-r border-ink-line bg-ink-surface h-screen sticky top-0">
       <div className="h-[72px] flex items-center gap-3 px-5">
-        <span className="w-8 h-8 rounded-lg bg-brand text-white flex items-center justify-center font-bold text-xs">LF</span>
+        <span className="w-8 h-8 rounded-lg bg-brand text-white flex items-center justify-center font-bold text-xs">BA</span>
         <div>
           <div className="text-[15px] font-semibold tracking-tight">Branch Avenue</div>
           <div className="text-[10px] font-mono uppercase tracking-wider text-ink-subtle">Agency Console</div>
