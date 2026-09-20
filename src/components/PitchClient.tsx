@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const viewports = [
   { id: 'desktop', width: '100%', label: 'Desktop' },
@@ -50,6 +50,10 @@ export default function PitchClient({
   const [newChange, setNewChange] = useState('');
   const [approved, setApproved] = useState(status === 'approved');
   const [paying, setPaying] = useState(false);
+  // Some sites refuse to be framed (X-Frame-Options / CSP). The iframe then never fires
+  // load, so treat a silent frame as blocked and show the proposal content instead.
+  const [frameBlocked, setFrameBlocked] = useState(false);
+  const frameLoaded = useRef(false);
 
   async function approve() {
     setApproved(true);
@@ -80,6 +84,16 @@ export default function PitchClient({
   const vp = viewports.find((v) => v.id === viewport)!;
   const currentPage = pages[activePage];
   const currentUrl = liveUrl ? pageUrl(liveUrl, currentPage?.name || '', activePage) : null;
+
+  useEffect(() => {
+    if (!currentUrl) return;
+    frameLoaded.current = false;
+    setFrameBlocked(false);
+    const timer = setTimeout(() => {
+      if (!frameLoaded.current) setFrameBlocked(true);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [currentUrl]);
 
   const price =
     priceCents != null
@@ -148,13 +162,21 @@ export default function PitchClient({
             </div>
 
             <div className="site">
-              {currentUrl ? (
+              {currentUrl && !frameBlocked ? (
                 <iframe
                   key={currentUrl}
                   className="live-frame"
                   src={currentUrl}
                   title={`${currentPage?.name || 'Page'} — live preview`}
+                  onLoad={() => {
+                    frameLoaded.current = true;
+                  }}
                 />
+              ) : currentUrl && frameBlocked ? (
+                <div className="empty">
+                  <p>This site can&apos;t be displayed inside the review room.</p>
+                  <p>{currentUrl.replace(/^https?:\/\//, '')} blocks embedding.</p>
+                </div>
               ) : (
                 <>
                   <div className="hero">
