@@ -50,7 +50,6 @@ export default function PitchClient({
   const [newChange, setNewChange] = useState('');
   const [approved, setApproved] = useState(status === 'approved');
   const [paying, setPaying] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   async function approve() {
     setApproved(true);
@@ -82,17 +81,6 @@ export default function PitchClient({
   const currentPage = pages[activePage];
   const currentUrl = liveUrl ? pageUrl(liveUrl, currentPage?.name || '', activePage) : null;
 
-  async function copyUrl() {
-    if (!currentUrl) return;
-    await navigator.clipboard.writeText(currentUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1600);
-  }
-
-  function openUrl() {
-    if (currentUrl) window.open(currentUrl, '_blank', 'noopener');
-  }
-
   const price =
     priceCents != null
       ? `$${(priceCents / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}`
@@ -106,12 +94,6 @@ export default function PitchClient({
         <div className="status">{approved ? 'Approved' : status}</div>
         <div className="topspace" />
         <div className="topnote">{vp.label}</div>
-        <button aria-label="Copy live URL" onClick={copyUrl} disabled={!currentUrl}>
-          {copied ? 'Copied' : 'Copy'}
-        </button>
-        <button aria-label="Open live URL" onClick={openUrl} disabled={!currentUrl}>
-          Open
-        </button>
       </header>
 
       <main className="workspace">
@@ -140,12 +122,6 @@ export default function PitchClient({
                 <i />
               </div>
               <div className="address">{currentUrl || 'No live URL yet'}</div>
-              <button onClick={copyUrl} disabled={!currentUrl}>
-                {copied ? 'Copied' : 'Copy'}
-              </button>
-              <button onClick={openUrl} disabled={!currentUrl}>
-                Open
-              </button>
             </div>
 
             <div className="viewportbar">
