@@ -18,8 +18,8 @@ export default function LandingPage() {
         </p>
 
         <div className="flex gap-3">
-          <Link href="/api/auth/login" className="btn btn-primary flex-1 justify-center">
-            Sign in with WorkOS
+          <Link href="/login" className="btn btn-primary flex-1 justify-center">
+            Sign in
           </Link>
           <Link href="/pitch/demo" className="btn flex-1 justify-center">
             View demo pitch

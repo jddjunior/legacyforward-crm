@@ -6,7 +6,18 @@ import { getOrigin } from '@/lib/origin';
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code');
-  if (!code) return NextResponse.redirect(new URL('/', getOrigin(request)));
+  if (!code) return NextResponse.redirect(new URL('/login?error=auth', getOrigin(request)));
+
+  let next = '/portal';
+  const state = request.nextUrl.searchParams.get('state');
+  if (state) {
+    try {
+      const parsed = JSON.parse(Buffer.from(state, 'base64url').toString());
+      if (typeof parsed.next === 'string' && parsed.next.startsWith('/')) next = parsed.next;
+    } catch {
+      // ignore malformed state
+    }
+  }
 
   try {
     const { user, sealedSession } = await workos.userManagement.authenticateWithCode({
@@ -50,7 +61,9 @@ export async function GET(request: NextRequest) {
       orgRole: firstMembership?.role,
     });
 
-    const response = NextResponse.redirect(new URL('/portal', getOrigin(request)));
+    const destination =
+      firstMembership?.role === 'agency_admin' && next === '/portal' ? '/agency' : next;
+    const response = NextResponse.redirect(new URL(destination, getOrigin(request)));
     response.cookies.set('lf-session', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -61,6 +74,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (err) {
     console.error('Auth callback error:', err);
-    return NextResponse.redirect(new URL('/?auth_error=1', getOrigin(request)));
+    return NextResponse.redirect(new URL('/login?error=auth', getOrigin(request)));
   }
 }

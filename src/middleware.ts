@@ -4,6 +4,7 @@ import { getOrigin } from '@/lib/origin';
 
 const PUBLIC_PATHS = [
   '/',
+  '/login',
   '/pitch',
   '/api/auth',
   '/api/stripe-webhook',
@@ -27,7 +28,8 @@ export async function middleware(request: NextRequest) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const loginUrl = new URL('/api/auth/login', getOrigin(request));
+    const loginUrl = new URL('/login', getOrigin(request));
+    loginUrl.searchParams.set('next', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
