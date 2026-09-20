@@ -3,6 +3,7 @@ import { workos } from '@/lib/workos';
 import { prisma } from '@/lib/db';
 import { signSession } from '@/lib/session';
 import { getOrigin } from '@/lib/origin';
+import { SESSION_COOKIE, sessionCookieOptions } from '@/lib/cookie';
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code');
@@ -64,13 +65,7 @@ export async function GET(request: NextRequest) {
     const destination =
       firstMembership?.role === 'agency_admin' && next === '/portal' ? '/agency' : next;
     const response = NextResponse.redirect(new URL(destination, getOrigin(request)));
-    response.cookies.set('lf-session', sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60,
-    });
+    response.cookies.set(SESSION_COOKIE, sessionToken, sessionCookieOptions());
     return response;
   } catch (err) {
     console.error('Auth callback error:', err);

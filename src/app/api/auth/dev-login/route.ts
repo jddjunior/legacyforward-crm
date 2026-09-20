@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { signSession } from '@/lib/session';
 import { getOrigin } from '@/lib/origin';
+import { SESSION_COOKIE, sessionCookieOptions } from '@/lib/cookie';
 
 /**
  * Development-only sign-in: creates a session cookie for a seeded user without
@@ -32,11 +33,6 @@ export async function GET(request: NextRequest) {
 
   const target = request.nextUrl.searchParams.get('next') || '/portal';
   const response = NextResponse.redirect(new URL(target, getOrigin(request)));
-  response.cookies.set('lf-session', token, {
-    httpOnly: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 7 * 24 * 60 * 60,
-  });
+  response.cookies.set(SESSION_COOKIE, token, sessionCookieOptions());
   return response;
 }

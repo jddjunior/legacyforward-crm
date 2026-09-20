@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { SESSION_COOKIE, sessionCookieOptions } from '@/lib/cookie';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutDashboard, Building2, FileText, CheckSquare } from 'lucide-react';
@@ -33,13 +34,7 @@ export default async function AgencyLayout({ children }: { children: React.React
       orgId: membership.orgId,
       orgRole: 'agency_admin',
     });
-    cookies().set('lf-session', newToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60,
-    });
+    cookies().set(SESSION_COOKIE, newToken, sessionCookieOptions());
   }
 
   return (
