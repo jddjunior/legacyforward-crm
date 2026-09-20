@@ -88,6 +88,8 @@ model Proposal {
   pages  Json    // [{ name, sections: [{ heading, body, image }] }]
   status String  @default("draft") // draft, sent, approved, rejected
   token  String  @unique @default(cuid())
+  liveUrl    String? // live staging site embedded in the proposal preview
+  priceCents Int?    // project total shown on the proposal
 
   org            Org            @relation(fields: [orgId], references: [id], onDelete: Cascade)
   payments       Payment[]

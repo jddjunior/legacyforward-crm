@@ -1,12 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Monitor, Tablet, Smartphone, Check, X } from 'lucide-react';
 
 const viewports = [
-  { id: 'desktop', icon: Monitor, width: '100%', label: 'Desktop' },
-  { id: 'tablet', icon: Tablet, width: '768px', label: 'Tablet' },
-  { id: 'mobile', icon: Smartphone, width: '375px', label: 'Mobile' },
+  { id: 'desktop', width: '100%', label: 'Desktop' },
+  { id: 'tablet', width: '768px', label: 'Tablet' },
+  { id: 'mobile', width: '375px', label: 'Mobile' },
+];
+
+const HERO_IMAGE = 'https://media.base44.com/images/public/6a97f1747b6fbb1f9a2143e5/566cd4a9e_generated_102df09c.jpg';
+const SECTION_IMAGES = [
+  'https://media.base44.com/images/public/6a97f1747b6fbb1f9a2143e5/a94070613_generated_879c3cf6.jpg',
+  'https://media.base44.com/images/public/6a97f1747b6fbb1f9a2143e5/3ec7e2579_generated_42f77b93.jpg',
 ];
 
 interface ProposalPage {
@@ -14,24 +19,38 @@ interface ProposalPage {
   sections: { heading: string; body: string }[];
 }
 
+/** Live URL for a given proposal page: Home is the root, others become a slug path. */
+function pageUrl(liveUrl: string, pageName: string, index: number) {
+  if (index === 0 || /^home$/i.test(pageName)) return liveUrl;
+  const slug = pageName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  return `${liveUrl.replace(/\/$/, '')}/${slug}`;
+}
+
 export default function PitchClient({
   proposalId,
   pages,
   title,
   stripeEnabled,
+  liveUrl,
+  priceCents,
+  status,
 }: {
   proposalId: string;
   pages: ProposalPage[];
   title: string;
   stripeEnabled: boolean;
+  liveUrl: string | null;
+  priceCents: number | null;
+  status: string;
 }) {
   const [viewport, setViewport] = useState('desktop');
   const [activePage, setActivePage] = useState(0);
   const [showChanges, setShowChanges] = useState(false);
   const [changeRequests, setChangeRequests] = useState<{ page: string; request: string; status: string }[]>([]);
   const [newChange, setNewChange] = useState('');
-  const [approved, setApproved] = useState(false);
+  const [approved, setApproved] = useState(status === 'approved');
   const [paying, setPaying] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   async function approve() {
     setApproved(true);
@@ -59,131 +78,215 @@ export default function PitchClient({
     setNewChange('');
   }
 
-  const vp = viewports.find(v => v.id === viewport)!;
+  const vp = viewports.find((v) => v.id === viewport)!;
   const currentPage = pages[activePage];
+  const currentUrl = liveUrl ? pageUrl(liveUrl, currentPage?.name || '', activePage) : null;
+
+  async function copyUrl() {
+    if (!currentUrl) return;
+    await navigator.clipboard.writeText(currentUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1600);
+  }
+
+  function openUrl() {
+    if (currentUrl) window.open(currentUrl, '_blank', 'noopener');
+  }
+
+  const price =
+    priceCents != null
+      ? `$${(priceCents / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}`
+      : null;
 
   return (
-    <div className="min-h-screen bg-ink-surface flex flex-col">
-      {/* Toolbar */}
-      <header className="flex items-center gap-4 px-6 py-3 border-b border-ink-line bg-white">
-        <div className="flex items-center gap-2">
-          <span className="w-7 h-7 rounded-lg bg-brand text-white flex items-center justify-center font-bold text-[10px]">BA</span>
-          <span className="text-sm font-semibold">{title}</span>
-        </div>
+    <div className="room">
+      <header className="top">
+        <div className="mark">BA</div>
+        <div className="title">{title}</div>
+        <div className="status">{approved ? 'Approved' : status}</div>
+        <div className="topspace" />
+        <div className="topnote">{vp.label}</div>
+        <button aria-label="Copy live URL" onClick={copyUrl} disabled={!currentUrl}>
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+        <button aria-label="Open live URL" onClick={openUrl} disabled={!currentUrl}>
+          Open
+        </button>
+      </header>
 
-        <div className="flex items-center gap-1 ml-4 bg-ink-surface rounded-lg p-1">
-          {viewports.map((v) => {
-            const Icon = v.icon;
-            return (
+      <main className="workspace">
+        <aside className="rail">
+          <div className="railtitle">Pages</div>
+          <div className="thumbs">
+            {pages.map((p, i) => (
               <button
-                key={v.id}
-                onClick={() => setViewport(v.id)}
-                className={`p-1.5 rounded-md transition-colors ${viewport === v.id ? 'bg-white shadow-sm text-brand' : 'text-ink-subtle'}`}
-                title={v.label}
+                key={i}
+                className={`thumb${activePage === i ? ' active' : ''}`}
+                onClick={() => setActivePage(i)}
               >
-                <Icon size={16} />
+                <span />
+                <b>{p.name || `Page ${i + 1}`}</b>
               </button>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        </aside>
 
-        <div className="flex gap-1.5 ml-2">
-          {pages.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setActivePage(i)}
-              className={`text-xs px-2.5 py-1.5 rounded-md font-medium transition-colors ${activePage === i ? 'bg-brand text-white' : 'text-ink-muted hover:bg-ink-surface'}`}
-            >
-              {pages[i].name || `Page ${i + 1}`}
-            </button>
-          ))}
-        </div>
+        <section className="device-wrap">
+          <div className="browser" style={{ width: vp.width }}>
+            <div className="chrome">
+              <div className="dots">
+                <i />
+                <i />
+                <i />
+              </div>
+              <div className="address">{currentUrl || 'No live URL yet'}</div>
+              <button onClick={copyUrl} disabled={!currentUrl}>
+                {copied ? 'Copied' : 'Copy'}
+              </button>
+              <button onClick={openUrl} disabled={!currentUrl}>
+                Open
+              </button>
+            </div>
 
-        <div className="flex-1" />
+            <div className="viewportbar">
+              {viewports.map((v) => (
+                <button
+                  key={v.id}
+                  className={viewport === v.id ? 'selected' : undefined}
+                  onClick={() => setViewport(v.id)}
+                >
+                  {v.label}
+                </button>
+              ))}
+              <div className="tabs">
+                {pages.map((p, i) => (
+                  <button
+                    key={i}
+                    className={`tab${activePage === i ? ' selected' : ''}`}
+                    onClick={() => setActivePage(i)}
+                  >
+                    {p.name || `Page ${i + 1}`}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        {changeRequests.length > 0 && (
-          <span className="badge badge-yellow">{changeRequests.length} changes</span>
-        )}
+            <div className="site">
+              {currentUrl ? (
+                <iframe
+                  key={currentUrl}
+                  className="live-frame"
+                  src={currentUrl}
+                  title={`${currentPage?.name || 'Page'} — live preview`}
+                />
+              ) : (
+                <>
+                  <div className="hero">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={HERO_IMAGE} alt="" />
+                    <div className="hero-content">
+                      <h1>{title}</h1>
+                      <p>{currentPage?.name || 'Home'} — live build preview pending.</p>
+                    </div>
+                  </div>
+                  {currentPage?.sections?.map((section, i) => (
+                    <div key={i} className="site-section">
+                      <div>
+                        <h2>{section.heading}</h2>
+                        <p>{section.body}</p>
+                      </div>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img className="section-image" src={SECTION_IMAGES[i % SECTION_IMAGES.length]} alt="" />
+                    </div>
+                  ))}
+                  {(!currentPage?.sections || currentPage.sections.length === 0) && (
+                    <div className="empty">
+                      <p>This page is ready for your review.</p>
+                      <p>Approve above or request changes.</p>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </section>
 
-        {!approved ? (
-          <>
-            <button onClick={() => setShowChanges(!showChanges)} className="btn text-sm h-9">
+        <aside className="side">
+          <div className="scope-label">Proposal</div>
+          <h2>{title}</h2>
+          <div className="summary">
+            <div>
+              <span>Pages</span>
+              <strong>{pages.map((p, i) => p.name || `Page ${i + 1}`).join(', ')}</strong>
+            </div>
+            <div>
+              <span>Status</span>
+              {approved ? <span className="badge approved">Approved</span> : <strong>{status}</strong>}
+            </div>
+            {currentUrl && (
+              <div>
+                <span>Live URL</span>
+                <strong>{currentUrl.replace(/^https?:\/\//, '')}</strong>
+              </div>
+            )}
+          </div>
+          {price && (
+            <div className="price">
+              <small>Project total</small>
+              <b>{price}</b>
+            </div>
+          )}
+          <div className="side-actions">
+            <button className="request" onClick={() => setShowChanges(!showChanges)}>
               Request Changes
             </button>
-            <button onClick={approve} className="btn btn-primary text-sm h-9">
-              <Check size={16} /> Approve
-            </button>
-          </>
-        ) : (
-          <div className="flex items-center gap-3">
-            <span className="badge badge-green"><Check size={12} /> Approved</span>
-            {stripeEnabled ? (
-              <button onClick={pay} disabled={paying} className="btn btn-primary text-sm h-9">
+            {!approved ? (
+              <button className="approve" onClick={approve}>
+                Approve
+              </button>
+            ) : stripeEnabled ? (
+              <button className="pay" onClick={pay} disabled={paying}>
                 {paying ? 'Redirecting…' : 'Pay & Continue'}
               </button>
             ) : (
-              <span className="text-xs text-ink-muted">Add Stripe key to enable payment</span>
+              <div className="topnote">Add Stripe key to enable payment</div>
             )}
           </div>
-        )}
-      </header>
+        </aside>
 
-      {/* Change request panel */}
-      {showChanges && (
-        <div className="border-b border-ink-line bg-white px-6 py-4">
-          <div className="max-w-2xl">
-            <h3 className="text-sm font-semibold mb-2">Request changes for "{currentPage?.name}"</h3>
-            <div className="flex gap-2">
+        {showChanges && (
+          <section className="changes">
+            <h3>Request changes for &quot;{currentPage?.name}&quot;</h3>
+            <div className="change-row">
               <input
                 value={newChange}
                 onChange={(e) => setNewChange(e.target.value)}
                 placeholder="Describe what needs to change…"
-                className="input flex-1"
               />
-              <button onClick={submitChange} className="btn btn-primary">Submit</button>
+              <button className="submit" onClick={submitChange}>
+                Submit
+              </button>
             </div>
             {changeRequests.length > 0 && (
-              <div className="mt-3 space-y-1.5">
+              <div className="requests">
                 {changeRequests.map((cr, i) => (
-                  <div key={i} className="flex items-start gap-2 text-sm">
-                    <span className="text-xs font-mono text-ink-subtle mt-0.5">{cr.page}:</span>
-                    <span className="flex-1">{cr.request}</span>
-                    <span className="badge badge-yellow text-[10px]">{cr.status}</span>
+                  <div key={i} className="request-item">
+                    <code>{cr.page}:</code>
+                    <span>{cr.request}</span>
+                    <span className="badge pending">{cr.status}</span>
                   </div>
                 ))}
               </div>
             )}
-          </div>
-        </div>
-      )}
+          </section>
+        )}
 
-      {/* Preview */}
-      <div className="flex-1 flex items-start justify-center p-6 overflow-auto">
-        <div
-          className="bg-white rounded-xl shadow-sm border border-ink-line overflow-hidden transition-all"
-          style={{ width: vp.width, maxWidth: '100%' }}
-        >
-          <div className="border-b border-ink-line px-5 py-3 flex gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-red-400" />
-            <span className="w-3 h-3 rounded-full bg-yellow-400" />
-            <span className="w-3 h-3 rounded-full bg-green-400" />
-          </div>
-          <div className="p-8">
-            {currentPage?.sections?.map((section, i) => (
-              <div key={i} className="mb-8">
-                <h2 className="text-xl font-semibold tracking-tight mb-3">{section.heading}</h2>
-                <p className="text-ink-muted leading-relaxed">{section.body}</p>
-              </div>
-            ))}
-            {(!currentPage?.sections || currentPage.sections.length === 0) && (
-              <div className="text-center text-ink-muted py-20">
-                <p className="text-sm">This page is ready for your review.</p>
-                <p className="text-xs mt-2">Approve above or request changes.</p>
-              </div>
-            )}
-          </div>
+        <div className="bottom-note">
+          {changeRequests.length > 0
+            ? `${changeRequests.length} change requests pending`
+            : 'This page is ready for your review.'}
         </div>
-      </div>
+      </main>
     </div>
   );
 }

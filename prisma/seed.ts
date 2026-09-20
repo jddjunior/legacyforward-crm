@@ -210,6 +210,8 @@ async function main() {
           orgId: org.id,
           title: `${cd.name} — Website Build Proposal`,
           status: 'sent',
+          liveUrl: 'https://example.com',
+          priceCents: 850000,
           pages: [
             {
               name: 'Home',
@@ -243,6 +245,8 @@ async function main() {
           orgId: org.id,
           title: `${cd.name} — Website Build Proposal`,
           status: 'approved',
+          liveUrl: 'https://example.com',
+          priceCents: 1250000,
           pages: [
             {
               name: 'Home',
@@ -271,6 +275,8 @@ async function main() {
       orgId: demoOrg.id,
       title: 'Demo Contractor — Website Build',
       status: 'sent',
+      liveUrl: 'https://example.com',
+      priceCents: 850000,
       token: 'demo',
       pages: [
         {

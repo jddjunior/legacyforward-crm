@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
 import PitchClient from '@/components/PitchClient';
+import './pitch.css';
 
 export default async function PitchPage({ params }: { params: { token: string } }) {
   const proposal = await prisma.proposal.findUnique({
@@ -27,6 +28,9 @@ export default async function PitchPage({ params }: { params: { token: string } 
       pages={pages}
       title={proposal.title}
       stripeEnabled={!!stripeEnabled}
+      liveUrl={proposal.liveUrl}
+      priceCents={proposal.priceCents}
+      status={proposal.status}
     />
   );
 }
