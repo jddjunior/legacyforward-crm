@@ -13,6 +13,14 @@ const PUBLIC_PATHS = [
   '/api/payments',
 ];
 
+// Build an absolute redirect URL from the browser-visible host (behind the preview proxy
+// the internal Host differs from the origin the browser is on).
+function redirectTo(request: NextRequest, path: string) {
+  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? '';
+  const proto = request.headers.get('x-forwarded-proto') ?? 'http';
+  return NextResponse.redirect(new URL(path, `${proto}://${host}`), 307);
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -27,13 +35,12 @@ export async function middleware(request: NextRequest) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const location = `/login?next=${encodeURIComponent(pathname)}`;
-    return new NextResponse(null, { status: 307, headers: { location } });
+    return redirectTo(request, `/login?next=${encodeURIComponent(pathname)}`);
   }
 
   // Agency routes require agency_admin role
   if (pathname.startsWith('/agency') && session.orgRole !== 'agency_admin') {
-    return new NextResponse(null, { status: 307, headers: { location: '/portal' } });
+    return redirectTo(request, '/portal');
   }
 
   const response = NextResponse.next();

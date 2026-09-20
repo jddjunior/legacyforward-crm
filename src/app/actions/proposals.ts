@@ -57,7 +57,7 @@ export async function updateProposal(proposalId: string, formData: FormData) {
   const session = await requireSession();
   if (!session.orgId) throw new Error('No org');
 
-  await prisma.proposal.update({
+  const updated = await prisma.proposal.updateMany({
     where: { id: proposalId },
     data: {
       title: String(formData.get('title')),
@@ -66,6 +66,10 @@ export async function updateProposal(proposalId: string, formData: FormData) {
       status: String(formData.get('status') || 'sent'),
     },
   });
+
+  if (updated.count === 0) {
+    throw new Error('Proposal no longer exists');
+  }
 
   revalidatePath(`/agency/proposals/${proposalId}`);
   revalidatePath('/agency/proposals');
