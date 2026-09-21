@@ -26,7 +26,7 @@ export default function SignInCard({ next, error }: { next: string; error?: stri
         </div>
       )}
 
-      <form method="GET" action="/api/auth/login" className="space-y-4">
+      <form method="GET" action="/api/auth/login" target="_top" className="space-y-4">
         <input type="hidden" name="next" value={next} />
         <div>
           <label className="label" htmlFor="email">
@@ -37,6 +37,7 @@ export default function SignInCard({ next, error }: { next: string; error?: stri
             name="email"
             type="email"
             autoComplete="email"
+            required
             placeholder="you@company.com"
             className="input mt-1 w-full"
           />
@@ -57,12 +58,14 @@ export default function SignInCard({ next, error }: { next: string; error?: stri
           <div className="grid gap-2">
             <a
               href="/api/auth/dev-login?email=owner@apex-roofing.com&next=/portal"
+              target="_top"
               className="btn justify-center"
             >
               Demo client portal
             </a>
             <a
               href="/api/auth/dev-login?email=priya@lanternfield.com&next=/agency"
+              target="_top"
               className="btn justify-center"
             >
               Demo agency console
