@@ -843,7 +843,7 @@
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Legacy Forward&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;showSetupBanner&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Dashboard&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Branch Avenue&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;showSetupBanner&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Dashboard&quot;}}">
 class Component extends DCLogic {
   state = {
     route: 'dashboard',
@@ -1035,7 +1035,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const s = this.state;
-    const brandName = this.props.brandName || 'Legacy Forward';
+    const brandName = this.props.brandName || 'Branch Avenue';
     const route = s.route;
     const stages = this.stages();
     const posts = this.posts();
@@ -1278,7 +1278,7 @@ class Component extends DCLogic {
         { k: 'Status', v: this.postStatus(rawPost.id) },
         { k: 'Channel', v: rawPost.platform },
         { k: 'Scheduled', v: 'September ' + rawPost.day + ', 2026 · ' + rawPost.time },
-        { k: 'Owner', v: 'Legacy Forward · content team' },
+        { k: 'Owner', v: 'Branch Avenue · content team' },
         { k: 'Source', v: 'Brand wiki + media buckets' }
       ]
     } : { kind: '', title: '', copy: '', asset: '', rows: [] };

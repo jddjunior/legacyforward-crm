@@ -2,7 +2,7 @@
 
 ## What this project is
 
-Multi-tenant CRM & agency operations platform (LegacyForward CRM). Built with Next.js 14 (App Router), Postgres (Prisma), Redis, WorkOS auth, and Stripe payments. Transformed from static DC HTML prototypes into a full-stack application.
+Multi-tenant CRM & agency operations platform (Branch Avenue). Built with Next.js 14 (App Router), Postgres (Prisma), Redis, WorkOS auth, and Stripe payments. Transformed from static DC HTML prototypes into a full-stack application.
 
 ## Tech stack
 

@@ -308,14 +308,14 @@ async function main() {
   // Demo user for testing
   const demoUser = await prisma.user.create({
     data: {
-      email: 'demo@legacyforward.com',
+      email: 'demo@branchavenue.com',
       name: 'Demo User',
     },
   });
 
   console.log('Seed complete!');
   console.log('Demo pitch: /pitch/demo');
-  console.log('Demo email: demo@legacyforward.com');
+  console.log('Demo email: demo@branchavenue.com');
 }
 
 main()

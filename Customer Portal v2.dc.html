@@ -1408,7 +1408,7 @@
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Legacy Forward&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Branch Avenue&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
 class Component extends DCLogic {
   state = {
     stage: 'preview',
@@ -1698,7 +1698,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const s = this.state;
-    const brandName = this.props.brandName || 'Legacy Forward';
+    const brandName = this.props.brandName || 'Branch Avenue';
     const stage = s.stage;
     const inPortal = stage === 'portal';
     const route = s.route;

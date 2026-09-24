@@ -1483,7 +1483,7 @@
             <span style="width:32px;height:32px;border-radius:999px;flex:0 0 32px;background:#14141a;color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:600">DM</span>
             <span style="min-width:0">
               <span style="display:block;font-size:13px;font-weight:600">Dana Marsh</span>
-              <span style="display:block;margin-top:1px;font-size:12px;color:#6b6b74">dana@legacyforward.com</span>
+              <span style="display:block;margin-top:1px;font-size:12px;color:#6b6b74">dana@branchavenue.com</span>
             </span>
             <span style="margin-left:auto;font-size:12px;color:#6b6b74">Switch</span>
           </button>
@@ -1813,7 +1813,7 @@
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Legacy Forward&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Branch Avenue&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
 class Component extends DCLogic {
   state = {
     stage: 'preview',
@@ -2140,7 +2140,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const s = this.state;
-    const brandName = this.props.brandName || 'Legacy Forward';
+    const brandName = this.props.brandName || 'Branch Avenue';
     const stage = s.stage;
     const inPortal = stage === 'portal';
     const route = s.route;
@@ -2531,7 +2531,7 @@ class Component extends DCLogic {
     const oauthChip = s.oauthId ? this.brandChip(s.oauthId, 38) : { mark: '', style: '' };
     const oauthView = {
       mark: oauthChip.mark, chipStyle: oauthChip.style, scopes: oauthMeta.scopes,
-      title: 'Connect ' + oauthMeta.name + ' to Legacy Forward',
+      title: 'Connect ' + oauthMeta.name + ' to Branch Avenue',
       blurb: oauthMeta.name + ' will ask you to sign in, then return you here. Access is read-only unless a scope below says otherwise.'
     };
 
