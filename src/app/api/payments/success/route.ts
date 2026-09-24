@@ -1,36 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { stripe } from '@/lib/stripe';
 import { getOrigin } from '@/lib/origin';
+import { markCheckoutPaid } from '@/lib/payments';
 
 export async function GET(request: NextRequest) {
   const sessionId = request.nextUrl.searchParams.get('session_id');
-  const proposalId = request.nextUrl.searchParams.get('proposal_id');
-
-  if (!sessionId || !proposalId) {
-    return NextResponse.redirect(new URL('/', getOrigin(request)));
-  }
+  if (!sessionId) return NextResponse.redirect(new URL('/', getOrigin(request)));
 
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
-
     if (session.payment_status === 'paid') {
-      // Update payment record
-      await prisma.payment.updateMany({
-        where: { stripeSessionId: sessionId },
-        data: { status: 'paid', stripePaymentIntentId: session.payment_intent as string },
-      });
-
-      // Advance org onboarding stage
-      const proposal = await prisma.proposal.findUnique({ where: { id: proposalId } });
-      if (proposal) {
-        await prisma.org.update({
-          where: { id: proposal.orgId },
-          data: { onboardingStage: 'payment_complete' },
-        });
-      }
+      await markCheckoutPaid(session.id, (session.payment_intent as string) || null);
     }
-
     return NextResponse.redirect(new URL('/portal?payment=success', getOrigin(request)));
   } catch (err) {
     console.error('Payment success error:', err);

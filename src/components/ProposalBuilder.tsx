@@ -13,7 +13,7 @@ interface Page {
 let sectionCounter = 0;
 let pageCounter = 0;
 
-export default function ProposalBuilder({ clientOrgs }: { clientOrgs: { id: string; name: string }[] }) {
+export default function ProposalBuilder({ clientOrgs, defaultOrgId }: { clientOrgs: { id: string; name: string }[]; defaultOrgId?: string }) {
   const [pages, setPages] = useState<Page[]>([
     { id: pageCounter++, name: 'Home', sections: [{ id: sectionCounter++, heading: '', body: '' }] },
   ]);
@@ -55,7 +55,7 @@ export default function ProposalBuilder({ clientOrgs }: { clientOrgs: { id: stri
         </div>
         <div>
           <label className="label block mb-1.5">Client</label>
-          <select name="clientOrgId" className="input">
+          <select name="clientOrgId" className="input" defaultValue={defaultOrgId}>
             {clientOrgs.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
           </select>
         </div>

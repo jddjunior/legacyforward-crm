@@ -2,15 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { stripe } from '@/lib/stripe';
 import { getOrigin } from '@/lib/origin';
+import { buildFeeFor } from '@/lib/payments';
 
 export async function POST(request: NextRequest) {
   try {
-    const { proposalId, amount } = await request.json();
+    const { proposalId } = await request.json();
 
     const proposal = await prisma.proposal.findUnique({ where: { id: proposalId } });
     if (!proposal) return NextResponse.json({ error: 'Proposal not found' }, { status: 404 });
 
     const origin = getOrigin(request);
+    const amount = buildFeeFor(proposal);
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -19,7 +21,7 @@ export async function POST(request: NextRequest) {
           price_data: {
             currency: 'usd',
             product_data: { name: `${proposal.title} — Build Fee` },
-            unit_amount: amount || 250000, // $2,500 default
+            unit_amount: amount,
           },
           quantity: 1,
         },
@@ -34,7 +36,7 @@ export async function POST(request: NextRequest) {
         proposalId,
         orgId: proposal.orgId,
         stripeSessionId: session.id,
-        amount: amount || 250000,
+        amount,
         type: 'one_time',
         status: 'pending',
       },

@@ -3,7 +3,22 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
+  // Only seed an empty database so data created in the app survives restarts.
+  // Run with SEED_RESET=1 to wipe and reseed from scratch.
+  const hasData = (await prisma.org.count()) > 0;
+  if (hasData && process.env.SEED_RESET !== '1') {
+    console.log('Database already has data — skipping base seed.');
+    await seedMarketing();
+    return;
+  }
+
   console.log('Cleaning existing data…');
+  await prisma.call.deleteMany();
+  await prisma.document.deleteMany();
+  await prisma.siteRequest.deleteMany();
+  await prisma.socialPost.deleteMany();
+  await prisma.keyword.deleteMany();
+  await prisma.campaign.deleteMany();
   // Clean up in dependency order
   await prisma.changeRequest.deleteMany();
   await prisma.payment.deleteMany();
@@ -313,9 +328,62 @@ async function main() {
     },
   });
 
+  await seedMarketing();
+
   console.log('Seed complete!');
   console.log('Demo pitch: /pitch/demo');
   console.log('Demo email: demo@branchavenue.com');
+}
+
+const DAY = 24 * 60 * 60 * 1000;
+
+/** Demo data for the marketing modules; only fills orgs that have none yet. */
+async function seedMarketing() {
+  const clients = await prisma.org.findMany({ where: { isAgency: false, slug: { not: 'demo' } } });
+  for (const org of clients) {
+    if ((await prisma.campaign.count({ where: { orgId: org.id } })) > 0) continue;
+    const now = Date.now();
+
+    await prisma.campaign.createMany({
+      data: [
+        { orgId: org.id, name: 'Fall promotion — Search', platform: 'google_ads', status: 'active', budgetCents: 250000, spendCents: 143200, clicks: 612, leads: 38, startDate: new Date(now - 20 * DAY), endDate: new Date(now + 40 * DAY) },
+        { orgId: org.id, name: 'Brand awareness — Reels', platform: 'meta', status: 'active', budgetCents: 120000, spendCents: 58900, clicks: 1804, leads: 14, startDate: new Date(now - 12 * DAY), endDate: new Date(now + 18 * DAY) },
+        { orgId: org.id, name: 'Summer emergency service', platform: 'google_ads', status: 'ended', budgetCents: 200000, spendCents: 198400, clicks: 830, leads: 51, startDate: new Date(now - 90 * DAY), endDate: new Date(now - 30 * DAY) },
+      ],
+    });
+
+    await prisma.keyword.createMany({
+      data: [
+        { orgId: org.id, term: `${org.name.split(' ')[1]?.toLowerCase() || 'service'} near me`, position: 4, previousPosition: 7, volume: 2400 },
+        { orgId: org.id, term: 'emergency repair', position: 11, previousPosition: 9, volume: 880 },
+        { orgId: org.id, term: 'free estimate', position: 2, previousPosition: 2, volume: 590 },
+        { orgId: org.id, term: 'licensed contractor', position: null, previousPosition: null, volume: 320 },
+      ],
+    });
+
+    await prisma.socialPost.createMany({
+      data: [
+        { orgId: org.id, platform: 'instagram', content: 'Before & after: full replacement finished in two days. 🏠', scheduledAt: new Date(now + 2 * DAY), status: 'scheduled' },
+        { orgId: org.id, platform: 'facebook', content: 'Weekly tip: check your gutters before the first freeze.', scheduledAt: new Date(now + 5 * DAY), status: 'draft' },
+        { orgId: org.id, platform: 'google', content: 'Now booking fall inspections — free estimates all month.', scheduledAt: new Date(now - 3 * DAY), status: 'published' },
+      ],
+    });
+
+    await prisma.siteRequest.createMany({
+      data: [
+        { orgId: org.id, page: 'Home', request: 'Swap the hero photo for our new crew shot.', priority: 'normal', status: 'open' },
+        { orgId: org.id, page: 'Contact', request: 'Add Saturday hours (9am–1pm).', priority: 'high', status: 'in_progress' },
+      ],
+    });
+
+    await prisma.call.createMany({
+      data: [
+        { orgId: org.id, callerName: 'Dana Whitfield', callerNumber: '(555) 201-3344', durationSec: 312, status: 'answered', source: 'google_ads', notes: 'Wants a quote for next week.', createdAt: new Date(now - 2 * 60 * 60 * 1000) },
+        { orgId: org.id, callerNumber: '(555) 889-1020', durationSec: 0, status: 'missed', source: 'organic', createdAt: new Date(now - 5 * 60 * 60 * 1000) },
+        { orgId: org.id, callerName: 'Marcus Lee', callerNumber: '(555) 430-7788', durationSec: 45, status: 'voicemail', source: 'meta', notes: 'Left voicemail about warranty.', createdAt: new Date(now - DAY) },
+      ],
+    });
+  }
 }
 
 main()

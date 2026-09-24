@@ -6,8 +6,9 @@ import { clsx } from 'clsx';
 import {
   LayoutDashboard, Phone, CheckSquare, Users, User, GitBranch,
   Star, Globe, Search, Calendar, Megaphone, Package, FolderOpen,
-  FileText, Link2, Settings, LogOut,
+  Link2, Settings, LogOut, Building2,
 } from 'lucide-react';
+import OrgSwitcher, { type OrgOption } from './OrgSwitcher';
 
 const navGroups = [
   {
@@ -52,7 +53,16 @@ const navGroups = [
   },
 ];
 
-export default function Sidebar({ userName, orgName, badge }: { userName: string; orgName: string; badge?: string | null }) {
+type Props = {
+  userName: string;
+  orgName: string;
+  role?: string;
+  orgs: OrgOption[];
+  currentOrgId?: string;
+  showAgencyLink?: boolean;
+};
+
+export default function Sidebar({ userName, orgName, role, orgs, currentOrgId, showAgencyLink }: Props) {
   const pathname = usePathname();
 
   return (
@@ -66,13 +76,15 @@ export default function Sidebar({ userName, orgName, badge }: { userName: string
         </div>
       </div>
 
+      <OrgSwitcher orgs={orgs} currentOrgId={currentOrgId} />
+
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 flex flex-col gap-4 py-2">
         {navGroups.map((group) => (
           <div key={group.label} className="flex flex-col gap-0.5">
             <div className="text-[11px] font-medium text-ink-subtle px-2 py-1.5 uppercase tracking-wider">{group.label}</div>
             {group.items.map((item) => {
-              const active = pathname === item.id;
+              const active = item.id === '/portal' ? pathname === item.id : pathname.startsWith(item.id);
               const Icon = item.icon;
               return (
                 <Link
@@ -101,14 +113,19 @@ export default function Sidebar({ userName, orgName, badge }: { userName: string
       </nav>
 
       {/* User chip */}
-      <div className="p-3 flex-shrink-0">
+      <div className="p-3 flex-shrink-0 flex flex-col gap-2">
+        {showAgencyLink && (
+          <Link href="/agency" className="btn btn-ghost justify-center text-xs">
+            <Building2 size={14} /> Agency console
+          </Link>
+        )}
         <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg border border-ink-line bg-white">
           <span className="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center text-xs font-bold">
             {userName.split(' ').map(n => n[0]).join('').slice(0, 2)}
           </span>
           <div className="min-w-0 flex-1">
             <div className="text-[13px] font-semibold truncate">{userName}</div>
-            <div className="text-[11px] text-ink-muted truncate">Member</div>
+            <div className="text-[11px] text-ink-muted truncate capitalize">{(role || 'member').replace(/_/g, ' ')}</div>
           </div>
           <form action="/api/auth/logout" method="POST">
             <button type="submit" className="text-ink-subtle hover:text-red-600 transition-colors">

@@ -40,6 +40,12 @@ model Org {
   connections  Connection[]
   auditLogs    AuditLog[]
   payments     Payment[]
+  campaigns    Campaign[]
+  keywords     Keyword[]
+  socialPosts  SocialPost[]
+  siteRequests SiteRequest[]
+  documents    Document[]
+  calls        Call[]
 }
 
 model User {
@@ -253,5 +259,112 @@ model Connection {
   updatedAt DateTime @updatedAt
 
   @@unique([orgId, provider])
+  @@index([orgId])
+}
+
+// ── Marketing modules ───────────────────────────────────
+
+model Campaign {
+  id          String    @id @default(cuid())
+  orgId       String
+  name        String
+  platform    String    // google_ads, meta
+  status      String    @default("draft") // draft, active, paused, ended
+  budgetCents Int       // monthly budget
+  spendCents  Int       @default(0)
+  clicks      Int       @default(0)
+  leads       Int       @default(0)
+  startDate   DateTime?
+  endDate     DateTime?
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+model Keyword {
+  id               String  @id @default(cuid())
+  orgId            String
+  term             String
+  targetUrl        String?
+  position         Int?    // current Google rank, null = not ranking
+  previousPosition Int?
+  volume           Int?    // monthly searches
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([orgId, term])
+  @@index([orgId])
+}
+
+model SocialPost {
+  id          String   @id @default(cuid())
+  orgId       String
+  platform    String   // facebook, instagram, linkedin, google
+  content     String
+  scheduledAt DateTime
+  status      String   @default("draft") // draft, scheduled, published
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+model SiteRequest {
+  id       String @id @default(cuid())
+  orgId    String
+  page     String
+  request  String
+  priority String @default("normal") // low, normal, high
+  status   String @default("open") // open, in_progress, done
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+}
+
+model Document {
+  id          String @id @default(cuid())
+  orgId       String
+  name        String
+  category    String @default("general") // contract, invoice, brand, general
+  storagePath String // relative to the uploads directory
+  mimeType    String
+  sizeBytes   Int
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([orgId])
+}
+
+model Call {
+  id           String  @id @default(cuid())
+  orgId        String
+  callerName   String?
+  callerNumber String
+  durationSec  Int     @default(0)
+  status       String  @default("answered") // answered, missed, voicemail
+  source       String? // google_ads, meta, organic, direct
+  notes        String?
+  leadId       String? // set once the call is converted to a lead
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
   @@index([orgId])
 }

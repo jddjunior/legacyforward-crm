@@ -1,0 +1,6 @@
+node_modules/
+.next/
+# Client documents uploaded through the portal (runtime data, not source)
+storage/
+.env
+*.tsbuildinfo

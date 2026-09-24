@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
-import { LayoutDashboard, Building2, FileText, CheckSquare } from 'lucide-react';
+import { LayoutDashboard, Building2, FileText, CheckSquare, LogOut } from 'lucide-react';
+import OrgSwitcher, { type OrgOption } from './OrgSwitcher';
 
 const navItems = [
   { id: '/agency', label: 'Dashboard', icon: LayoutDashboard },
@@ -12,7 +13,7 @@ const navItems = [
   { id: '/agency/approvals', label: 'Approvals Queue', icon: CheckSquare },
 ];
 
-export default function AgencySidebar() {
+export default function AgencySidebar({ orgs, currentOrgId }: { orgs: OrgOption[]; currentOrgId?: string }) {
   const pathname = usePathname();
   return (
     <aside className="w-60 flex-shrink-0 flex flex-col border-r border-ink-line bg-ink-surface h-screen sticky top-0">
@@ -42,10 +43,14 @@ export default function AgencySidebar() {
           );
         })}
       </nav>
-      <div className="p-3">
-        <Link href="/portal" className="btn btn-ghost w-full justify-center text-xs">
-          Switch to Client Portal
-        </Link>
+      <div className="pb-3">
+        <div className="px-4 pb-1 text-[11px] text-ink-muted">Open a client portal</div>
+        <OrgSwitcher orgs={orgs} currentOrgId={currentOrgId} />
+        <form action="/api/auth/logout" method="POST" className="px-3">
+          <button type="submit" className="btn btn-ghost w-full justify-center text-xs">
+            <LogOut size={14} /> Sign out
+          </button>
+        </form>
       </div>
     </aside>
   );

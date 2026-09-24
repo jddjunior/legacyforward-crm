@@ -52,7 +52,8 @@ export async function GET(request: NextRequest) {
       include: { org: true },
     });
 
-    const firstMembership = memberships[0];
+    // Agency staff also belong to every client org; land them in the agency first.
+    const firstMembership = memberships.find((m) => m.org.isAgency) || memberships[0];
 
     const sessionToken = await signSession({
       userId: dbUser.id,
